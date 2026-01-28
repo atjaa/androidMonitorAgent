@@ -15,6 +15,9 @@
 3) 通过BootReceiver.kt监控开机广播启动本服务
 4) 通过ServiceCheckWorker.kt进行保活
 5) 通过PhotoService.kt提供前置摄像头拍照
+- 保活优化  
+增加小米手机支持的无障碍保活机制  
+AtjaaKeepAliveService.kt
 - 安卓权限  
 ```xml
     <uses-permission

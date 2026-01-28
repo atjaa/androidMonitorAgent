@@ -2,6 +2,7 @@ package com.atjaa.myapplication.utils
 
 
 import android.content.Context
+import android.util.Log
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
@@ -16,7 +17,7 @@ class CommonUtils {
          * 保活检查
          */
         fun scheduleServiceCheck(context: Context) {
-            println("启动保活进程")
+            Log.i("Atjaa","启动保活进程")
             val checkRequest = PeriodicWorkRequestBuilder<ServiceCheckWorker>(
                 15, TimeUnit.MINUTES // 系统允许的最小间隔是 15 分钟
             )

@@ -1,7 +1,9 @@
 package com.atjaa.myapplication
 
 import android.Manifest
+import android.accessibilityservice.AccessibilityService
 import android.app.AppOpsManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,6 +15,8 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
+import android.text.TextUtils
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -21,11 +25,13 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.atjaa.myapplication.databinding.ActivitySplashBinding
+import com.atjaa.myapplication.worker.AtjaaKeepAliveService
 import es.dmoral.toasty.Toasty
 
 class SplashActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySplashBinding
+
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,13 +69,43 @@ class SplashActivity : AppCompatActivity() {
         }
         // 拍照权限
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-            != PackageManager.PERMISSION_GRANTED) {
+            != PackageManager.PERMISSION_GRANTED
+        ) {
             // 权限未授予，需要请求权限
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA), 101)
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.CAMERA),
+                101
+            )
         }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.FOREGROUND_SERVICE_CAMERA), 101)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.FOREGROUND_SERVICE_CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.FOREGROUND_SERVICE_CAMERA),
+                101
+            )
         }
+
+
+
+        // 无障碍保活权限
+        if (!isAccessibilitySettingsOn(this, AtjaaKeepAliveService::class.java)) {
+            // 权限未开启，弹出提示或直接跳转
+            Toasty.info(this, "请在设置中开启[无障碍服务]以确保护理逻辑运行", Toasty.LENGTH_LONG)
+                .show()
+            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
+        } else {
+            // 权限已开启
+            Log.d("Accessibility", "服务已就绪")
+        }
+
+
 //        Handler(Looper.getMainLooper()).postDelayed({
 //            val intent = Intent(this, LoginActivity::class.java)
 //            startActivity(intent)
@@ -88,6 +124,28 @@ class SplashActivity : AppCompatActivity() {
                 finish()
             }
         }.start()
+    }
+
+    fun isAccessibilitySettingsOn(
+        context: Context,
+        service: Class<out AccessibilityService>
+    ): Boolean {
+        val expectedComponentName = ComponentName(context, service).flattenToString()
+        val enabledServices = Settings.Secure.getString(
+            context.contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        ) ?: return false
+
+        val colonSplitter = TextUtils.SimpleStringSplitter(':')
+        colonSplitter.setString(enabledServices)
+
+        while (colonSplitter.hasNext()) {
+            val componentName = colonSplitter.next()
+            if (componentName.equals(expectedComponentName, ignoreCase = true)) {
+                return true
+            }
+        }
+        return false
     }
 
     fun isIgnoringBatteryOptimizations(context: Context): Boolean {

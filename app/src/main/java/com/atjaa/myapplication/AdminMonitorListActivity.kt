@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import com.atjaa.myapplication.bean.ConstConfig
 import com.atjaa.myapplication.databinding.ActivityAdminMonitorListBinding
 import com.atjaa.myapplication.service.ImagePreviewDialog
+import com.atjaa.myapplication.service.TextPreviewDialog
 import com.atjaa.myapplication.utils.HttpUtils
 import com.atjaa.myapplication.utils.MonitorUtils
 import com.atjaa.myapplication.utils.SystemInforUtils
@@ -85,17 +86,23 @@ class AdminMonitorListActivity : AppCompatActivity() {
             var result = HttpUtils.fetchUrlContent(url)
             if (null != result && result.startsWith("ok#")) {
                 var dataStr = result.substring(3)
-                val decodedBytes =
-                    android.util.Base64.decode(dataStr, android.util.Base64.DEFAULT)
-                val bitmap = android.graphics.BitmapFactory.decodeByteArray(
-                    decodedBytes,
-                    0,
-                    decodedBytes.size
-                )
-
-                if (bitmap != null) {
+                if (dataStr.startsWith("手机")) {
                     runOnUiThread {
-                        ImagePreviewDialog(bitmap).show(supportFragmentManager, "preview")
+                        TextPreviewDialog(dataStr).show(supportFragmentManager, "preview")
+                    }
+                } else {
+                    val decodedBytes =
+                        android.util.Base64.decode(dataStr, android.util.Base64.DEFAULT)
+                    val bitmap = android.graphics.BitmapFactory.decodeByteArray(
+                        decodedBytes,
+                        0,
+                        decodedBytes.size
+                    )
+
+                    if (bitmap != null) {
+                        runOnUiThread {
+                            ImagePreviewDialog(bitmap).show(supportFragmentManager, "preview")
+                        }
                     }
                 }
             }

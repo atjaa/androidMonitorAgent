@@ -11,6 +11,7 @@ class ImagePreviewDialog(private val bitmap: Bitmap) : androidx.fragment.app.Dia
         }
         return android.app.AlertDialog.Builder(requireContext())
             .setView(iv)
+            .setTitle("TITLE")
             .setPositiveButton("关闭", null)
             .create()
     }

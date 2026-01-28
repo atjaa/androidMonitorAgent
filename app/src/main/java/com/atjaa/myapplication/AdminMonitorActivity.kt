@@ -2,10 +2,12 @@ package com.atjaa.myapplication
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Html
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ListView
 import android.widget.SimpleAdapter
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -88,6 +90,17 @@ class AdminMonitorActivity : AppCompatActivity() {
                             R.id.txt_name
                         ) // 对应布局中的控件ID
                     )
+                    simpleAdapter.viewBinder =
+                        SimpleAdapter.ViewBinder { view, data, textRepresentation ->
+                            if (view.id == R.id.txt_ip && data is String) {
+                                val textView = view as TextView
+                                // 将字符串解析为 HTML 并设置给 TextView
+                                textView.text = Html.fromHtml(data, Html.FROM_HTML_MODE_LEGACY)
+                                true // 返回 true 表示我们已经手动处理了该 View，SimpleAdapter 不需要再处理
+                            } else {
+                                false // 返回 false 让 SimpleAdapter 按默认方式处理其他 View
+                            }
+                        }
                     runOnUiThread {
                         list.adapter = simpleAdapter
                     }
@@ -113,12 +126,21 @@ class AdminMonitorActivity : AppCompatActivity() {
                 if (null != result && result.startsWith("ok#")) {
                     var info: HashMap<String, String> = HashMap<String, String>()
 
-                    if (ip.equals(localIp)) {
-                        info.put("ip", "IP地址：" + ip + "(本机)")
+                    // TODO 着急，逻辑可以优化
+                    if (ip.startsWith(localIp)) {
+                        info.put(
+                            "ip",
+                            "IP地址：" + ip + "(本机)" + result.substring(3).split("#")
+                                .get(1) + "#" + result.substring(3).split("#").get(2)
+                        )
                     } else {
-                        info.put("ip", "IP地址：" + ip)
+                        info.put(
+                            "ip",
+                            "IP地址：" + ip + result.substring(3).split("#")
+                                .get(1) + "#" + result.substring(3).split("#").get(2)
+                        )
                     }
-                    info.put("name", "机器名：" + result.substring(3))
+                    info.put("name", "机器名：" + result.substring(3).split("#").get(0))
                     info.put("id", ip)
                     dataList.add(info)
                 }

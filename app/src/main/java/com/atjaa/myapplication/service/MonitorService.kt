@@ -184,12 +184,24 @@ class MonitorService : Service() {
 
     // 获取系统全局设置中的设备名称
     fun getCustomDeviceName(context: Context): String {
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        val isScreenOn = pm.isInteractive // 屏幕是否亮着
+        var screenStr: String
+        if (isScreenOn) {
+            screenStr = "#<font color='#FF0000'>(亮屏)</font>"
+        } else {
+            screenStr = "#(熄屏)"
+        }
+        if (!isScreenOn) {
+
+        }
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME)
-                ?: "Unknown Device"
+            (Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME)
+                ?: "Unknown Device") + screenStr
         } else {
             // 旧版本通过蓝牙或特定字段获取
-            Settings.Secure.getString(context.contentResolver, "bluetooth_name") ?: "Unknown Device"
+            (Settings.Secure.getString(context.contentResolver, "bluetooth_name")
+                ?: "Unknown Device") + screenStr
         }
     }
 

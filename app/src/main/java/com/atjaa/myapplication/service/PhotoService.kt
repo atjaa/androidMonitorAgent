@@ -1,6 +1,10 @@
 package com.atjaa.myapplication.service
 
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -10,15 +14,18 @@ import android.os.IBinder
 import android.util.Log
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.CameraState
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleService
+import com.atjaa.myapplication.bean.ConstConfig
 import com.atjaa.myapplication.utils.MonitorUtils
 
 
@@ -35,7 +42,18 @@ class PhotoService : LifecycleService() {
         return binder
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        // 立即创建通知并启动前台服务 (适配 Android 8.0+)
+        startForeground(1, createNotification())
+    }
+
     fun katePhoto(): String {
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        val isScreenOn = pm.isInteractive // 屏幕是否亮着
+        if(!isScreenOn){
+            return "手机处于锁屏状态"
+        }
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         var dataStr: String? = null
         cameraProviderFuture.addListener({
@@ -97,6 +115,7 @@ class PhotoService : LifecycleService() {
                     }
                 }
 
+
             } catch (e: Exception) {
                 Log.e("CameraX", "绑定失败", e)
             }
@@ -124,5 +143,18 @@ class PhotoService : LifecycleService() {
         matrix.postScale(-1f, 1f, bitmap.width / 2f, bitmap.height / 2f)
 
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+    }
+    private fun createNotification(): Notification {
+        val channelId = "photo_service"
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val channel =
+                NotificationChannel(channelId, "Photo Server", NotificationManager.IMPORTANCE_LOW)
+            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+        }
+        return NotificationCompat.Builder(this, channelId)
+            .setContentTitle("Photo服务运行中")
+            .setContentText("Photo服务运行中")
+            .setSmallIcon(android.R.drawable.stat_notify_sync)
+            .build()
     }
 }

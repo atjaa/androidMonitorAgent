@@ -19,6 +19,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- 确保 Socket 长连接在 CPU 进入休眠时不中断，申请和使用 WAKE_LOCK -->
     <uses-feature android:name="android.hardware.camera.any" /> <!-- 摄像头权限 -->
     <uses-permission android:name="android.permission.CAMERA" /> <!-- 摄像头权限 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
 
     <application
         android:name=".app.AtjaaApplication"
@@ -34,7 +35,9 @@
         <service
             android:name=".service.PhotoService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true"
+            android:foregroundServiceType="camera"
+            tools:ignore="ForegroundServicePermission" />
         <service
             android:name=".service.MonitorService"
             android:enabled="true"

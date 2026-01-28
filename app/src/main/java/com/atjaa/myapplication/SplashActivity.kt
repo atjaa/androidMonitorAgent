@@ -1,5 +1,6 @@
 package com.atjaa.myapplication
 
+import android.Manifest
 import android.app.AppOpsManager
 import android.content.Context
 import android.content.Intent
@@ -13,6 +14,7 @@ import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -24,6 +26,7 @@ import es.dmoral.toasty.Toasty
 class SplashActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySplashBinding
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -63,6 +66,9 @@ class SplashActivity : AppCompatActivity() {
             != PackageManager.PERMISSION_GRANTED) {
             // 权限未授予，需要请求权限
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA), 101)
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.FOREGROUND_SERVICE_CAMERA), 101)
         }
 //        Handler(Looper.getMainLooper()).postDelayed({
 //            val intent = Intent(this, LoginActivity::class.java)

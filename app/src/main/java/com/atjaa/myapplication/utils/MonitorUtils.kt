@@ -58,12 +58,31 @@ class MonitorUtils {
             }
             return dataList
         }
+
         fun bitmapToBase64(bitmap: Bitmap): String {
             val scaledBitmap = if (bitmap.width > 128 || bitmap.height > 128) {
                 Bitmap.createScaledBitmap(bitmap, 128, 128, true)
             } else {
                 bitmap
             }
+            val outputStream = ByteArrayOutputStream()
+            // 质量压缩：70 表示压缩 30%，保留 70% 质量
+            // 在 2026 年，建议使用 Bitmap.CompressFormat.WEBP_LOSSY 以获得最佳体积比
+//            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                // API 30 及以上使用新常量
+                scaledBitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 50, outputStream)
+            } else {
+                // API 30 以下使用旧常量（已弃用但仍可用，且支持 API 24）
+                @Suppress("DEPRECATION")
+                scaledBitmap.compress(Bitmap.CompressFormat.WEBP, 50, outputStream)
+            }
+            val byteArray = outputStream.toByteArray()            // 转为 Base64 字符串方便嵌入 JSON 传输
+            return Base64.encodeToString(byteArray, Base64.DEFAULT)
+        }
+
+        fun bitmapToBase64(bitmap: Bitmap, dstWidth: Int, dstHeigh: Int): String {
+            val scaledBitmap = Bitmap.createScaledBitmap(bitmap, dstWidth, dstHeigh, true)
             val outputStream = ByteArrayOutputStream()
             // 质量压缩：70 表示压缩 30%，保留 70% 质量
             // 在 2026 年，建议使用 Bitmap.CompressFormat.WEBP_LOSSY 以获得最佳体积比
@@ -92,7 +111,6 @@ class MonitorUtils {
             }
         }
     }
-
 
 
 }

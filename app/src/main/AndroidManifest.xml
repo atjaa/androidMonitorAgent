@@ -4,18 +4,21 @@
 
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"
-        tools:ignore="ProtectedPermissions" /><!-- 获取其他APP信息 -->
+        tools:ignore="ProtectedPermissions" /> <!-- 获取其他APP信息 -->
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- 自启动，有bug -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE"
         tools:ignore="ForegroundServicesPolicy" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
     <uses-permission android:name="android.permission.INTERNET" /> <!-- 网络权限 -->
-    <uses-permission android:name="android.permission.BLUETOOTH" /><!-- 获取蓝牙名称通常是获取用户自定义手机名最通用的办法 -->
+    <uses-permission android:name="android.permission.BLUETOOTH" /> <!-- 获取蓝牙名称通常是获取用户自定义手机名最通用的办法 -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" /><!-- 确保 Socket 长连接在 CPU 进入休眠时不中断，申请和使用 WAKE_LOCK -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- 确保 Socket 长连接在 CPU 进入休眠时不中断，申请和使用 WAKE_LOCK -->
+    <uses-feature android:name="android.hardware.camera.any" /> <!-- 摄像头权限 -->
+    <uses-permission android:name="android.permission.CAMERA" /> <!-- 摄像头权限 -->
 
     <application
         android:name=".app.AtjaaApplication"
@@ -28,6 +31,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidMonitorAgent"
         android:usesCleartextTraffic="true">
+        <service
+            android:name=".service.PhotoService"
+            android:enabled="true"
+            android:exported="true"></service>
         <service
             android:name=".service.MonitorService"
             android:enabled="true"

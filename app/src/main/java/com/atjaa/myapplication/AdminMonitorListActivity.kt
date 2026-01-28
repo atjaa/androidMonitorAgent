@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.atjaa.myapplication.bean.ConstConfig
 import com.atjaa.myapplication.databinding.ActivityAdminMonitorListBinding
+import com.atjaa.myapplication.service.ImagePreviewDialog
 import com.atjaa.myapplication.utils.HttpUtils
 import com.atjaa.myapplication.utils.MonitorUtils
 import com.atjaa.myapplication.utils.SystemInforUtils
@@ -63,7 +64,7 @@ class AdminMonitorListActivity : AppCompatActivity() {
                 }
 
                 R.id.menu_option -> {
-                    Toasty.info(this, "开始截屏")
+                    takePhoto()
                     true
                 }
 
@@ -75,6 +76,30 @@ class AdminMonitorListActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         initView(type)
+    }
+
+    fun takePhoto() {
+
+        var url = "http://" + ip + ":" + ConstConfig.PORT + "/monitor/photo"
+        lifecycleScope.launch(Dispatchers.IO) {
+            var result = HttpUtils.fetchUrlContent(url)
+            if (null != result && result.startsWith("ok#")) {
+                var dataStr = result.substring(3)
+                val decodedBytes =
+                    android.util.Base64.decode(dataStr, android.util.Base64.DEFAULT)
+                val bitmap = android.graphics.BitmapFactory.decodeByteArray(
+                    decodedBytes,
+                    0,
+                    decodedBytes.size
+                )
+
+                if (bitmap != null) {
+                    runOnUiThread {
+                        ImagePreviewDialog(bitmap).show(supportFragmentManager, "preview")
+                    }
+                }
+            }
+        }
     }
 
     fun initView(type: Int) {

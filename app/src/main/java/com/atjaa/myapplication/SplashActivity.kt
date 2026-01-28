@@ -3,6 +3,7 @@ package com.atjaa.myapplication
 import android.app.AppOpsManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -13,6 +14,8 @@ import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.atjaa.myapplication.databinding.ActivitySplashBinding
@@ -54,6 +57,12 @@ class SplashActivity : AppCompatActivity() {
             } catch (e: Exception) {
             }
             Toasty.error(this, "无法获取ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS权限").show()
+        }
+        // 拍照权限
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
+            != PackageManager.PERMISSION_GRANTED) {
+            // 权限未授予，需要请求权限
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA), 101)
         }
 //        Handler(Looper.getMainLooper()).postDelayed({
 //            val intent = Intent(this, LoginActivity::class.java)

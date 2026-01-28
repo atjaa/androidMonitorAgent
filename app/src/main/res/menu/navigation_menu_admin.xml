@@ -10,6 +10,6 @@
         android:icon="@android:drawable/ic_menu_month"
         android:title="Month" />
     <item android:id="@+id/menu_option"
-        android:icon="@android:drawable/ic_menu_month"
-        android:title="截屏" />
+        android:icon="@android:drawable/presence_video_busy"
+        android:title="前拍" />
 </menu>

@@ -5,24 +5,22 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.provider.Settings
 import android.text.format.DateUtils
+
 import androidx.core.app.NotificationCompat
-import androidx.work.Constraints
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
+
 import com.atjaa.myapplication.bean.ConstConfig
 import com.atjaa.myapplication.utils.CommonUtils
 import com.atjaa.myapplication.utils.MonitorUtils
 import com.atjaa.myapplication.utils.SystemInforUtils
-import com.atjaa.myapplication.worker.ServiceCheckWorker
 import com.google.gson.Gson
 import es.dmoral.toasty.Toasty
 import io.ktor.server.cio.*
@@ -34,7 +32,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
 
 
 class MonitorService : Service() {
@@ -45,6 +42,20 @@ class MonitorService : Service() {
     // 提供http服务
     private var server: EmbeddedServer<CIOApplicationEngine, CIOApplicationEngine.Configuration>? =
         null
+    private var targetService: PhotoService? = null
+    private var isBound = false
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            //  获取 TargetService 实例
+            val binder = service as PhotoService.LocalBinder
+            targetService = binder.getService()
+            isBound = true
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            isBound = false
+        }
+    }
 
     override fun onBind(intent: Intent): IBinder {
         TODO("Return the communication channel to the service.")
@@ -77,12 +88,15 @@ class MonitorService : Service() {
                 "Phone Assistant:RemoteMessagingWakeLock"
             )
         }
-        // 1. 立即创建通知并启动前台服务 (适配 Android 8.0+)
+        // 立即创建通知并启动前台服务 (适配 Android 8.0+)
         startForeground(1, createNotification())
 
-        // 2. 开启线程监听端口
+        // 开启线程监听端口
         startTcpServer(ConstConfig.PORT)
         CommonUtils.scheduleServiceCheck(this)
+        // 绑定目标 Service
+        val intent = Intent(this, PhotoService::class.java)
+        bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
 
     private fun createNotification(): Notification {
@@ -129,9 +143,8 @@ class MonitorService : Service() {
                 get("/monitor/month") {
                     call.respondText("ok#" + getMonitorInfo(2))
                 }
-                get("/monitor/image") {
-                    // TODO 不可用
-                    call.respondText("ok#" + getImage())
+                get("/monitor/photo") {
+                    call.respondText("ok#" + targetService?.katePhoto())
                 }
             }
         }
@@ -143,11 +156,6 @@ class MonitorService : Service() {
                 e.printStackTrace()
             }
         }
-    }
-
-    fun getImage(): String {
-
-        return ""
     }
 
 

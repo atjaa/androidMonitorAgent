@@ -2,6 +2,7 @@ package com.atjaa.myapplication
 
 import android.Manifest
 import android.accessibilityservice.AccessibilityService
+import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.AppOpsManager
 import android.content.ComponentName
 import android.content.Context
@@ -17,6 +18,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
+import android.view.accessibility.AccessibilityManager
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -126,25 +128,33 @@ class SplashActivity : AppCompatActivity() {
         }.start()
     }
 
-    fun isAccessibilitySettingsOn(
-        context: Context,
-        service: Class<out AccessibilityService>
-    ): Boolean {
-        val expectedComponentName = ComponentName(context, service).flattenToString()
+    fun isAccessibilitySettingsOn(context: Context, service: Class<out AccessibilityService>): Boolean {
+        val serviceName = "${context.packageName}/${service.name}"
         val enabledServices = Settings.Secure.getString(
             context.contentResolver,
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
         ) ?: return false
 
+        // 使用冒号分割并检查
         val colonSplitter = TextUtils.SimpleStringSplitter(':')
         colonSplitter.setString(enabledServices)
-
         while (colonSplitter.hasNext()) {
             val componentName = colonSplitter.next()
-            if (componentName.equals(expectedComponentName, ignoreCase = true)) {
+            // 兼容性判断：匹配全路径或简写路径
+            if (componentName.equals(serviceName, ignoreCase = true)) {
                 return true
             }
         }
+
+        // 二次检查：通过系统服务直接获取当前“活跃中”的服务列表（最准确）
+        val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+        val enabledAppList = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_GENERIC)
+        for (info in enabledAppList) {
+            if (info.resolveInfo.serviceInfo.name == service.name) {
+                return true
+            }
+        }
+
         return false
     }
 

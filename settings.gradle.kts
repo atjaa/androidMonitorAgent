@@ -21,5 +21,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "testApp1"
+rootProject.name = "androidMonitorAgent"
 include(":app")

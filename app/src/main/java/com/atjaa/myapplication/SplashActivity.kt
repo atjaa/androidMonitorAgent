@@ -45,44 +45,8 @@ class SplashActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val context = this
-        // 无障碍保活权限
-        if (!isAccessibilitySettingsOn(this, AtjaaKeepAliveService::class.java)) {
-            val accessibilityManager = getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
-            // 注册监听器
-            val stateChangeListener = AccessibilityManager.AccessibilityStateChangeListener { enabled ->
-                if (enabled) {
-                    // 检查你的服务是否真的被开启了（因为其他应用开启也会触发此回调）
-                    if (isAccessibilitySettingsOn(this, AtjaaKeepAliveService::class.java)) {
-                        Log.d("Accessibility", "无障碍权限已激活！")
-                        // 执行跳转回 App 的逻辑
-                        val intent = Intent(context, SplashActivity::class.java).apply {
-                            // 关键：如果 Activity 已在后台，则将其移至前台，而不是创建新实例
-                            addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                            // 如果是在 Service 或 Listener 中启动，必须加这个
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            // 选配：传递一个参数告诉 Activity 是从权限页回来的
-                            putExtra("FROM_ACCESSIBILITY_SETTING", true)
-                        }
-                        context.startActivity(intent)
-                    }
-                }
-            }
-            accessibilityManager.addAccessibilityStateChangeListener(stateChangeListener)
-            // 授权操作
-            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
-                // TODO 尝试精准定位到App授权页
-                val componentName = "$packageName/${AtjaaKeepAliveService::class.java.name}"
-                putExtra("extra_fragment_arg_key", componentName) // 某些系统会识别此 key
-                putExtra("extra_is_from_x", true)
-            }
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
-        } else {
-            // 权限已开启
-            Log.d("Accessibility", "服务已就绪")
-        }
-        // TODO 无障碍授权后，下面获取权限全部自动
+
+// TODO 无障碍授权后，下面获取权限全部自动
         // 获取查看其他APP状态的权限
         if (!hasUsageStatsPermission(this)) {
             val intent = Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
@@ -107,6 +71,7 @@ class SplashActivity : AppCompatActivity() {
             }
             Toasty.error(this, "无法获取ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS权限").show()
         }
+
         // 拍照权限
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
             != PackageManager.PERMISSION_GRANTED
@@ -115,17 +80,6 @@ class SplashActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(android.Manifest.permission.CAMERA),
-                101
-            )
-        }
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.FOREGROUND_SERVICE_CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(android.Manifest.permission.FOREGROUND_SERVICE_CAMERA),
                 101
             )
         }
@@ -146,37 +100,6 @@ class SplashActivity : AppCompatActivity() {
             }
         }.start()
     }
-
-    fun isAccessibilitySettingsOn(context: Context, service: Class<out AccessibilityService>): Boolean {
-        val serviceName = "${context.packageName}/${service.name}"
-        val enabledServices = Settings.Secure.getString(
-            context.contentResolver,
-            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-        ) ?: return false
-
-        // 使用冒号分割并检查
-        val colonSplitter = TextUtils.SimpleStringSplitter(':')
-        colonSplitter.setString(enabledServices)
-        while (colonSplitter.hasNext()) {
-            val componentName = colonSplitter.next()
-            // 兼容性判断：匹配全路径或简写路径
-            if (componentName.equals(serviceName, ignoreCase = true)) {
-                return true
-            }
-        }
-
-        // 二次检查：通过系统服务直接获取当前“活跃中”的服务列表（最准确）
-        val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
-        val enabledAppList = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_GENERIC)
-        for (info in enabledAppList) {
-            if (info.resolveInfo.serviceInfo.name == service.name) {
-                return true
-            }
-        }
-
-        return false
-    }
-
     fun isIgnoringBatteryOptimizations(context: Context): Boolean {
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         // 检查当前应用包名是否在白名单中
@@ -206,4 +129,5 @@ class SplashActivity : AppCompatActivity() {
 
         return mode == AppOpsManager.MODE_ALLOWED
     }
+
 }

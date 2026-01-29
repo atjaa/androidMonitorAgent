@@ -1,5 +1,6 @@
 package com.atjaa.myapplication
 
+import android.app.AppOpsManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -14,6 +15,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.atjaa.myapplication.utils.SpCacheUtils
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import es.dmoral.toasty.Toasty
 
 class AutoStartActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,7 +28,6 @@ class AutoStartActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
     }
 
     override fun onResume() {
@@ -45,15 +47,40 @@ class AutoStartActivity : AppCompatActivity() {
         requestAutoStart(this)
     }
 
+    fun autoAppInfo(view: View) {
+        // 获取查看其他APP状态的权限
+        if (!hasUsageStatsPermission(this)) {
+            val intent = Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
+                // 某些系统版本下可以定位到具体 App 的二级页面，但并非所有系统都支持
+                // data = Uri.fromParts("package", packageName, null)
+            }
+            try {
+                startActivity(intent)
+            } catch (e: Exception) {
+            }
+            Toasty.error(this, "无法获取OPSTR_GET_USAGE_STATS权限").show()
+        } else {
+            Toasty.info(this, "已经开启").show()
+        }
+    }
+
     /**
      * 进入下一个页面
      */
     fun autoSkip(view: View) {
-        SpCacheUtils.init(this)
-        SpCacheUtils.put("autoStart", "true")
-        val intent = Intent(this, SplashActivity::class.java)
-        startActivity(intent)
-        finish()
+        MaterialAlertDialogBuilder(this)
+            .setTitle("确认跳过")
+            .setMessage("我们需要自启动和使用情况查看来进行保活和信息处理，请确认已开启")
+            .setPositiveButton("确定") { dialog, which ->
+                // 用户点了确定，跳转逻辑
+                SpCacheUtils.init(this)
+                SpCacheUtils.put("autoStart", "true")
+                val intent = Intent(this, SplashActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
 
     fun requestAutoStart(context: Context) {
@@ -106,5 +133,29 @@ class AutoStartActivity : AppCompatActivity() {
             detailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(detailIntent)
         }
+    }
+
+    fun hasUsageStatsPermission(context: Context): Boolean {
+        val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+
+        // unsafeCheckOpNoThrow 是 API 29 后的推荐做法
+        val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // API 29 及以上使用 unsafeCheckOpNoThrow
+            appOps.unsafeCheckOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(),
+                packageName
+            )
+        } else {
+            // API 29 以下使用老的 checkOpNoThrow
+            @Suppress("DEPRECATION")
+            appOps.checkOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(),
+                packageName
+            )
+        }
+
+        return mode == AppOpsManager.MODE_ALLOWED
     }
 }

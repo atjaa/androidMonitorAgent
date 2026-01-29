@@ -20,6 +20,7 @@
     <uses-feature android:name="android.hardware.camera.any" /> <!-- 摄像头权限 -->
     <uses-permission android:name="android.permission.CAMERA" /> <!-- 摄像头权限 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" /> <!-- 摄像头权限 -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> <!--顶层遮罩 -->
     <uses-permission
         android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"
         tools:ignore="ProtectedPermissions" />
@@ -35,9 +36,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidMonitorAgent"
         android:usesCleartextTraffic="true">
-        <activity
-            android:name=".AutoStartActivity"
-            android:exported="false" />
 
         <service
             android:name=".worker.AtjaaKeepAliveService"
@@ -74,7 +72,10 @@
                 <category android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
-
+        <activity
+            android:name=".AutoStartActivity"
+            android:exported="true" >
+        </activity>
         <activity
             android:name=".AdminMonitorListActivity"
             android:exported="false" />

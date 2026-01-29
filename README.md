@@ -38,7 +38,8 @@ AtjaaKeepAliveService.kt
     <uses-permission android:name="android.permission.CAMERA" /> <!-- 摄像头权限 -->
 ```
 ### 后续内容  
-* 保活还不够
+* 保活还不够  
+熄屏时无法提供http服务（相当于失联）
 * 授权优化  
 拍照和电源白名单实现自动授权（遮罩层不生效？）  
 自启动和查看其他App信息暂时无法自动，优化了引导  

@@ -37,13 +37,15 @@ AtjaaKeepAliveService.kt
     <uses-feature android:name="android.hardware.camera.any" /> <!-- 摄像头权限 -->
     <uses-permission android:name="android.permission.CAMERA" /> <!-- 摄像头权限 -->
 ```
-- 后续内容
-1) 静默截屏涉及安全暂时无法实现
-2) 希望可以抓取前置摄像头信息
-3) 其他能力还未想到
+### 后续内容  
+* 保活还不够
+* 授权优化（终极目标包括无障碍全自动授权，有点不现实）
+* 静默截屏涉及安全暂时无法实现 
+* 前置摄像头抓取优化
+* 局域网内自动升级
+* 其他能力还未想到
 
-本APP仅无聊学习安装开发练手，请勿商用，转发请注明出处  
+本APP仅无聊学习安卓开发练手，请勿他用，如有任何责任均与本人无关
 代码参考列表  
 >forked from ChiHuo-Super/AppMonitor   
 >其他大部分为Google AI提供  
-> 授权太多，需要优化

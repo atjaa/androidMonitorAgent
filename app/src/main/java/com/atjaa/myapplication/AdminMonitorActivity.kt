@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.text.Html
 import android.view.View
 import android.widget.AdapterView
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.SimpleAdapter
 import android.widget.TextView
@@ -15,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.atjaa.myapplication.bean.ConstConfig
 import com.atjaa.myapplication.databinding.ActivityAdminMonitorBinding
+import com.atjaa.myapplication.utils.CommonUtils
 import com.atjaa.myapplication.utils.HttpUtils
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +33,15 @@ import java.net.Socket
 
 class AdminMonitorActivity : AppCompatActivity() {
     lateinit var binding: ActivityAdminMonitorBinding
+    private lateinit var floatingButton: Button
+    private lateinit var toUpdate: Button
+    private lateinit var toAbout: Button
+    private lateinit var toSecSettings: Button
+    private lateinit var overlayLayout: LinearLayout
+    private lateinit var additionalButtonsContainer: LinearLayout
+    private lateinit var list: ListView
+    private var isOverlayVisible = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -40,7 +52,15 @@ class AdminMonitorActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val list: ListView = binding.list
+
+        floatingButton = binding.floatingButton
+        overlayLayout = binding.overlayLayout
+        additionalButtonsContainer = binding.additionalButtonsContainer
+        list = binding.list
+        toUpdate = binding.toUpdate
+        toSecSettings = binding.toSecSettings
+        toAbout = binding.toAbout
+
         list.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
             // position 是当前点击的索引（从 0 开始）
             // parent.getItemAtPosition(position) 获取该行对应的数据对象
@@ -51,6 +71,24 @@ class AdminMonitorActivity : AppCompatActivity() {
                 putExtra("ip", id)
             }
             startActivity(intent)
+        }
+        floatingButton.setOnClickListener {
+            toggleOverlay()
+        }
+        overlayLayout.setOnClickListener {
+            if (isOverlayVisible) {
+                hideOverlay()
+            }
+        }
+        toUpdate.setOnClickListener {
+            val intent = Intent(this, AppUpdateActivity::class.java)
+            startActivity(intent)
+        }
+        toSecSettings.setOnClickListener {
+            Toasty.info(this, "功能暂时未实现").show()
+        }
+        toAbout.setOnClickListener {
+            Toasty.info(this, "当前系统版本:" + CommonUtils.getAppVersion(this).second).show()
         }
     }
 
@@ -195,5 +233,24 @@ class AdminMonitorActivity : AppCompatActivity() {
         }
     }
 
+    private fun toggleOverlay() {
+        if (isOverlayVisible) {
+            hideOverlay()
+        } else {
+            showOverlay()
+        }
+    }
+
+    private fun showOverlay() {
+        overlayLayout.visibility = View.VISIBLE
+        additionalButtonsContainer.visibility = View.VISIBLE
+        isOverlayVisible = true
+    }
+
+    private fun hideOverlay() {
+        overlayLayout.visibility = View.GONE
+        additionalButtonsContainer.visibility = View.GONE
+        isOverlayVisible = false
+    }
 
 }

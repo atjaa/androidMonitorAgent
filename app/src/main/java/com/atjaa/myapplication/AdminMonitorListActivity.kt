@@ -64,7 +64,7 @@ class AdminMonitorListActivity : AppCompatActivity() {
                     true
                 }
 
-                R.id.menu_option -> {
+                R.id.menu_photo -> {
                     takePhoto()
                     true
                 }

@@ -2,6 +2,9 @@ package com.atjaa.myapplication.service
 
 import android.os.Bundle
 
+/**
+ * 提供弹框确认能力
+ */
 class TextPreviewDialog(private val content: String) : androidx.fragment.app.DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): android.app.Dialog {
         val scrollView = android.widget.ScrollView(requireContext())

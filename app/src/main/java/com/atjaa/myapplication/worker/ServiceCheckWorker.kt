@@ -3,6 +3,7 @@ package com.atjaa.myapplication.worker
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
@@ -15,12 +16,12 @@ import java.util.concurrent.TimeUnit
 
 class ServiceCheckWorker(context: Context, workerParams: WorkerParameters) :
     Worker(context, workerParams) {
-
+    val TAG: String = "MyAccessibilityService"
     override fun doWork(): Result {
         val context = applicationContext
         // 检查服务是否正在运行（2026 年标准做法是检查静态变量或进程状态）
         if (!isPortOpen("127.0.0.1", ConstConfig.PORT)) {
-            println("保活检查失败，重新拉起服务")
+            Log.i(TAG, "保活检查失败，重新拉起服务")
             val intent = Intent(context, MonitorService::class.java)
             // 注意：Android 14+ 后台启动前台服务有限制，需捕获异常
             try {
@@ -34,7 +35,7 @@ class ServiceCheckWorker(context: Context, workerParams: WorkerParameters) :
                 return Result.retry()
             }
         } else {
-            println("保活检查成功")
+            Log.i(TAG, "保活检查成功")
         }
 
         // 测试使用开始，看下保活是否可用
@@ -47,7 +48,7 @@ class ServiceCheckWorker(context: Context, workerParams: WorkerParameters) :
     }
 
     private fun isPortOpen(ip: String, port: Int, timeout: Int = 200): Boolean {
-        println("保活检查开始")
+        Log.i(TAG, "触发保活检查")
         return try {
             val socket = Socket()
             socket.connect(InetSocketAddress(ip, port), timeout)

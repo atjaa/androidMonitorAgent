@@ -14,6 +14,7 @@ import android.os.IBinder
 import android.os.PowerManager
 import android.provider.Settings
 import android.text.format.DateUtils
+import android.util.Log
 
 import androidx.core.app.NotificationCompat
 
@@ -31,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -44,6 +46,7 @@ class MonitorService : Service() {
         null
     private var targetService: PhotoService? = null
     private var isBound = false
+    val TAG: String = "MonitorService"
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             //  获取 TargetService 实例
@@ -114,46 +117,59 @@ class MonitorService : Service() {
     }
 
     private fun startTcpServer(port: Int) {
-        // 测试wifi切换不影响服务，只要保活
-        // 无论第一次启动，还是被杀重启，窦先清理服务
-        try {
-            server?.stop(1000, 2000)
-        } catch (e: Exception) {
-        }
-//        thread {
-//            while (
-//                true
-//
-//            ) {
-//                Thread.sleep(1000)
-//                println("休息1秒")
-//            }
-//        }
-        server = embeddedServer(CIO, port, host = "0.0.0.0") {
-            routing {
-                get("/") {
-                    call.respondText("ok#" + getCustomDeviceName(applicationContext))
-                }
-                get("/monitor/day") {
-                    call.respondText("ok#" + getMonitorInfo(0))
-                }
-                get("/monitor/week") {
-                    call.respondText("ok#" + getMonitorInfo(1))
-                }
-                get("/monitor/month") {
-                    call.respondText("ok#" + getMonitorInfo(2))
-                }
-                get("/monitor/photo") {
-                    call.respondText("ok#" + targetService?.katePhoto())
-                }
-            }
-        }
-
-        serviceScope.launch {
+        serviceScope.launch(Dispatchers.IO) {
+            // 测试wifi切换不影响服务，只要保活
+            // 无论第一次启动，还是被杀重启，先清理服务
             try {
-                server?.start(wait = true)
+                server?.stop(1000, 2000)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "首先尝试STOP HTTP" + e)
+            }
+            var isStarted = false
+            var retryCount = 0
+            val maxRetries = 5
+
+            while (!isStarted && retryCount < maxRetries) {
+                try {
+                    // 每次重试时重新构建 server 实例（防止内部状态残留）
+                    server = embeddedServer(CIO, port = port, host = "0.0.0.0") {
+                        routing {
+                            get("/") {
+                                call.respondText("ok#" + getCustomDeviceName(applicationContext))
+                            }
+                            get("/monitor/day") {
+                                call.respondText("ok#" + getMonitorInfo(0))
+                            }
+                            get("/monitor/week") {
+                                call.respondText("ok#" + getMonitorInfo(1))
+                            }
+                            get("/monitor/month") {
+                                call.respondText("ok#" + getMonitorInfo(2))
+                            }
+                            get("/monitor/photo") {
+                                call.respondText("ok#" + targetService?.katePhoto())
+                            }
+                        }
+                    }
+
+                    // 2. 关键点：这里 wait 必须设为 false 才能继续后续逻辑判断
+                    server?.start(wait = false)
+
+                    isStarted = true
+                    Log.i(TAG, "HTTP服务在端口 $port 启动成功 (第 $retryCount 次尝试)")
+                } catch (e: Exception) {
+                    retryCount++
+                    Log.w(TAG, "第 $retryCount 次启动失败，原因: ${e.message}")
+
+                    server = null // 释放资源
+
+                    if (retryCount < maxRetries) {
+                        Log.w(TAG, "等待 2 秒后重试...")
+                        delay(2000) // 3. 协程挂起，不阻塞主线程
+                    } else {
+                        Log.e(TAG, "达到最大重试次数，放弃启动。")
+                    }
+                }
             }
         }
     }

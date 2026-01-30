@@ -10,7 +10,7 @@ import com.atjaa.myapplication.service.MonitorService
 class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (Intent.ACTION_BOOT_COMPLETED == intent.getAction()) {
+        if (Intent.ACTION_BOOT_COMPLETED == intent.getAction() || Intent.ACTION_MY_PACKAGE_REPLACED == intent.getAction()) {
             // 启动 Service
             val serviceIntent: Intent = Intent(context, MonitorService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

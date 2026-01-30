@@ -28,7 +28,7 @@ class AtjaaKeepAliveService : AccessibilityService() {
         }
 
         val currentTime = System.currentTimeMillis()
-        // 间隔少于 5 分钟 (300,000 毫秒) 则直接跳过
+        // 间隔少于 2 分钟 则直接跳过
         if (currentTime - lastCheckTime < 1000 * 60 * 2) {
             return
         }

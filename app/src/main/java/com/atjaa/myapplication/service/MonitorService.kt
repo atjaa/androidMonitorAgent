@@ -204,7 +204,7 @@ class MonitorService : Service() {
         val isScreenOn = pm.isInteractive // 屏幕是否亮着
         var screenStr: String
         if (isScreenOn) {
-            screenStr = "#<font color='#FF0000'>(亮屏)</font>"
+            screenStr = "#<font color='red'>(亮屏)</font>"
         } else {
             screenStr = "#(熄屏)"
         }

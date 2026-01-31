@@ -3,6 +3,7 @@ package com.atjaa.myapplication
 import android.content.Intent
 import android.os.Bundle
 import android.text.Html
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Button
@@ -41,6 +42,7 @@ class AdminMonitorActivity : AppCompatActivity() {
     private lateinit var additionalButtonsContainer: LinearLayout
     private lateinit var list: ListView
     private var isOverlayVisible = false
+    private val TAG = "AdminMonitorActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,7 +114,7 @@ class AdminMonitorActivity : AppCompatActivity() {
                 if (null != localIp) {
                     var ipPrefix = localIp.substring(0, localIp.lastIndexOf('.') + 1)
                     var openIps = scanSubnet(ipPrefix, ConstConfig.PORT)
-                    println("扫描完成，开放设备数: ${openIps.size}")
+                    Log.i(TAG, "扫描完成，开放设备数: ${openIps.size}")
                     var datalist = getInfoList(openIps, localIp)
                     val
                     // 创建SimpleAdapter
@@ -133,7 +135,6 @@ class AdminMonitorActivity : AppCompatActivity() {
                         SimpleAdapter.ViewBinder { view, data, textRepresentation ->
                             if (view.id == R.id.txt_ip && data is String) {
                                 val textView = view as TextView
-                                // 将字符串解析为 HTML 并设置给 TextView
                                 textView.text = Html.fromHtml(data, Html.FROM_HTML_MODE_LEGACY)
                                 true // 返回 true 表示我们已经手动处理了该 View，SimpleAdapter 不需要再处理
                             } else {
@@ -145,7 +146,7 @@ class AdminMonitorActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                println("扫描异常" + e)
+                Log.e(TAG, "扫描异常" + e)
             } finally {
                 // 3. 任务完成后（无论成功失败），切回主线程恢复按钮
                 runOnUiThread {
@@ -159,24 +160,24 @@ class AdminMonitorActivity : AppCompatActivity() {
     suspend fun getInfoList(openIps: List<String>, localIp: String): List<Map<String, Any>> {
         var dataList: MutableList<Map<String, Any>> = ArrayList<Map<String, Any>>()
         if (null != openIps && openIps.size > 0) {
+            Log.i(TAG, "准备获取主机信息 " + openIps.toString())
             for (ip in openIps) {
                 var url = "http://" + ip + ":" + ConstConfig.PORT + "/"
                 var result = HttpUtils.fetchUrlContent(url)
                 if (null != result && result.startsWith("ok#")) {
+                    Log.i(TAG, "获取主机信息  " + result)
                     var info: HashMap<String, String> = HashMap<String, String>()
 
                     // TODO 着急，逻辑可以优化
                     if (ip.startsWith(localIp)) {
                         info.put(
                             "ip",
-                            "IP地址：" + ip + "(本机)" + result.substring(3).split("#")
-                                .get(1) + "#" + result.substring(3).split("#").get(2)
+                            "IP地址：" + ip + "(本机)" + result.substring(3).split("#").get(1)
                         )
                     } else {
                         info.put(
                             "ip",
-                            "IP地址：" + ip + result.substring(3).split("#")
-                                .get(1) + "#" + result.substring(3).split("#").get(2)
+                            "IP地址：" + ip + result.substring(3).split("#").get(1)
                         )
                     }
                     info.put("name", "机器名：" + result.substring(3).split("#").get(0))

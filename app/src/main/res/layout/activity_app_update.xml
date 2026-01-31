@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    >
+    tools:context=".AppUpdateActivity">
     <LinearLayout
         android:id="@+id/lin1"
         android:layout_width="match_parent"
@@ -29,8 +30,34 @@
             android:layout_height="wrap_content"
             android:text="Phone Assistant Update"
             android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="32dp" />
+            android:textStyle="bold" />
+        <LinearLayout
+            android:id="@+id/hostInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="32dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/ip_value"
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="#DCDCEB"
+                android:ems="10"
+                android:inputType="numberPassword"
+                />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/port_value"
+                android:layout_width="80dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="#DCDCEB"
+                android:ems="10"
+                android:inputType="numberPassword"
+                />
+        </LinearLayout>
         <ProgressBar
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleHorizontal"

@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -118,5 +119,8 @@ class AppUpdateActivity : AppCompatActivity(), AppUpdateManager.DownloadListener
         statusText.text = "下载失败: $error"
         Log.e(TAG, "下载失败" + error)
         Toasty.info(this, error, Toasty.LENGTH_LONG).show()
+    }
+    fun back(view: View) {
+        onBackPressedDispatcher.onBackPressed()
     }
 }

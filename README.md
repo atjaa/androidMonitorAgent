@@ -28,8 +28,14 @@
 - 保活优化  
   增加小米手机支持的无障碍保活机制  
   AtjaaKeepAliveService.kt
-- 安卓权限
 
+- 局域网自动升级  
+  AppUpdateActivity 实现局域网内指定ip和端口的自动升级，省去每次更新都USB安装的问题
+
+- 授权状态检查  
+  PermissionCheckActivity 对本应用所需的权限进行整理报告
+
+- 安卓权限
 ```xml
 
 <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
@@ -60,7 +66,6 @@ android:name="android.permission.WAKE_LOCK" /><!-- 确保 Socket 长连接在 CP
 * 静默截屏涉及安全暂时无法实现
 * 前置摄像头抓取优化
 * 做一个快速连接到系统敏感设置的页面
-* 局域网内自动升级
 * 其他能力还未想到
 
 本APP仅无聊学习安卓开发练手，请勿他用，如有任何责任均与本人无关

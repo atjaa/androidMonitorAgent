@@ -24,6 +24,11 @@ import com.atjaa.myapplication.databinding.ActivitySplashBinding
 import com.atjaa.myapplication.utils.PermissionUtils
 import es.dmoral.toasty.Toasty
 
+/**
+ * 进入系统的倒计时页面
+ * 主要进行授权申请操作
+ * 使用无障碍进行自动点击自动授权
+ */
 class SplashActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySplashBinding

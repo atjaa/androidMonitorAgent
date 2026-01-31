@@ -19,6 +19,9 @@ import es.dmoral.toasty.Toasty
 import java.text.SimpleDateFormat
 
 
+/**
+ * 被监控端自己展示页面
+ */
 class MonitorActivity : AppCompatActivity() {
     lateinit var binding: ActivityMonitorBinding
     var type: Int = 0

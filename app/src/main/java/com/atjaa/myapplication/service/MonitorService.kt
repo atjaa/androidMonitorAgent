@@ -9,6 +9,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.media.AudioAttributes
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
@@ -26,6 +28,7 @@ import com.google.gson.Gson
 import es.dmoral.toasty.Toasty
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
+import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +39,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
+/**
+ * 监控侧后台服务
+ * 需要被保活拉起
+ */
 class MonitorService : Service() {
 
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -105,6 +112,9 @@ class MonitorService : Service() {
         CommonUtils.createNotificationChannel(this)
     }
 
+    /**
+     * 创建前台服务需要发一个通知
+     */
     private fun createNotification(): Notification {
         val channelId = "tcp_service"
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -119,6 +129,9 @@ class MonitorService : Service() {
             .build()
     }
 
+    /**
+     * 启动HTTP服务监听
+     */
     private fun startTcpServer(port: Int) {
         serviceScope.launch(Dispatchers.IO) {
             // 测试wifi切换不影响服务，只要保活
@@ -155,9 +168,22 @@ class MonitorService : Service() {
                             get("/monitor/message") {
                                 val message = call.request.queryParameters["m"]
                                 if (null != message) {
-                                    CommonUtils.showNotification("家长通知", message, this@MonitorService)
+                                    CommonUtils.showNotification(
+                                        "家长通知",
+                                        message,
+                                        this@MonitorService
+                                    )
                                 }
                                 call.respondText("ok#")
+                            }
+                            post("/monitor/voice") {
+                                val multipart = call.receiveMultipart()
+                                var file = CommonUtils.fileVoice(this@MonitorService, multipart)
+                                if (file != null) {
+                                    Log.i(TAG, "收到音频文件准备播放")
+                                    playReceivedVoice(file!!.absolutePath)
+                                    call.respondText("ok#")
+                                }
                             }
                         }
                     }
@@ -184,7 +210,35 @@ class MonitorService : Service() {
         }
     }
 
+    /**
+     * 播放语音文件
+     */
+    fun playReceivedVoice(path: String){
+        val mediaPlayer = MediaPlayer()
+        mediaPlayer.setDataSource(path)
+        // 建议设置为语音模式，这样声音会走媒体通道
+        mediaPlayer.setAudioAttributes(
+            AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .setUsage(AudioAttributes.USAGE_ALARM) // 强制甚至在静音时可能响起的通道，或者用 USAGE_MEDIA
+                .build()
+        )
+        mediaPlayer.prepare()
+        mediaPlayer.start()
 
+        mediaPlayer.setOnCompletionListener {
+            it.stop()
+            it.release() // 播完后释放内存
+        }
+        mediaPlayer.setOnErrorListener { mp, _, _ ->
+            mp.release()
+            true
+        }
+    }
+
+    /**
+     * 获取APP监控信息
+     */
     fun getMonitorInfo(type: Int): String {
         val systemInfor = SystemInforUtils(this, type)
         var datalist: List<Map<String, Any>> = ArrayList<Map<String, Any>>()
@@ -208,7 +262,9 @@ class MonitorService : Service() {
         return Gson().toJson(result)
     }
 
-    // 获取系统全局设置中的设备名称
+    /**
+     * 获取设备名称
+     */
     fun getCustomDeviceName(context: Context): String {
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         val isScreenOn = pm.isInteractive // 屏幕是否亮着

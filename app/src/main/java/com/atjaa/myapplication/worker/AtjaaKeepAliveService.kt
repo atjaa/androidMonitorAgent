@@ -9,6 +9,11 @@ import com.atjaa.myapplication.utils.CommonUtils
 import com.atjaa.myapplication.utils.OverlayHelper
 
 
+/**
+ * 无障碍服务
+ * 1、提供保活
+ * 2、进行自动授权
+ */
 class AtjaaKeepAliveService : AccessibilityService() {
 
     val TAG: String = "MyAccessibilityService"

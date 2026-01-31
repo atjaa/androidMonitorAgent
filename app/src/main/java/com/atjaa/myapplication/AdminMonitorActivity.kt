@@ -32,6 +32,9 @@ import java.net.InetSocketAddress
 import java.net.NetworkInterface
 import java.net.Socket
 
+/**
+ * 监控扫描页
+ */
 class AdminMonitorActivity : AppCompatActivity() {
     lateinit var binding: ActivityAdminMonitorBinding
     private lateinit var floatingButton: Button

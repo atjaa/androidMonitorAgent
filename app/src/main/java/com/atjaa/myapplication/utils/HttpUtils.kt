@@ -5,6 +5,9 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
+/**
+ * 提供http访问能力
+ */
 class HttpUtils {
     companion object {
         suspend fun fetchUrlContent(url: String): String? = withContext(Dispatchers.IO) {

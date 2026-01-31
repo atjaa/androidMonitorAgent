@@ -21,9 +21,11 @@ import androidx.core.view.WindowInsetsCompat
 import com.atjaa.myapplication.databinding.ActivityAppUpdateBinding
 import com.atjaa.myapplication.service.AppUpdateManager
 import es.dmoral.toasty.Toasty
-import okhttp3.Protocol
 import java.io.File
 
+/**
+ * APP自动更新页面
+ */
 class AppUpdateActivity : AppCompatActivity(), AppUpdateManager.DownloadListener {
     private lateinit var appUpdateManager: AppUpdateManager
     private lateinit var progressBar: ProgressBar

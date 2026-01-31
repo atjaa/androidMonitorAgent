@@ -7,6 +7,9 @@ import android.os.Build
 import com.atjaa.myapplication.service.MonitorService
 
 
+/**
+ * 广播监听服务
+ */
 class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {

@@ -12,8 +12,6 @@ import android.graphics.Color
 import android.media.RingtoneManager
 import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresPermission
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -26,8 +24,16 @@ import androidx.work.WorkManager
 import com.atjaa.myapplication.NotificationMessageActivity
 import com.atjaa.myapplication.R
 import com.atjaa.myapplication.worker.ServiceCheckWorker
+import io.ktor.http.content.MultiPartData
+import io.ktor.http.content.PartData
+import io.ktor.http.content.forEachPart
+import io.ktor.http.content.streamProvider
+import java.io.File
 import java.util.concurrent.TimeUnit
 
+/**
+ * 通用工具类
+ */
 class CommonUtils {
     companion object {
         val TAG = "CommonUtils"
@@ -54,6 +60,10 @@ class CommonUtils {
             )
         }
 
+        /**
+         * 获取APP的版本号
+         * （构建版本号）
+         */
         fun getAppVersion(context: Context): Pair<Long, String> {
             val manager = context.packageManager
             val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -72,6 +82,10 @@ class CommonUtils {
             return Pair(versionCode, versionName)
         }
 
+        /**
+         * 创建通知渠道
+         * 渠道号暂时写死
+         */
         fun createNotificationChannel(context: Context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val name = "新消息通知"
@@ -91,6 +105,9 @@ class CommonUtils {
             }
         }
 
+        /**
+         * 往通知渠道发送消息
+         */
         fun showNotification(title: String, message: String, context: Context) {
             try {
                 Log.i(TAG, "往安卓消息渠道发送消息：" + message)
@@ -116,10 +133,15 @@ class CommonUtils {
                     .setFullScreenIntent(pendingIntent, true) // 关键：强制弹出横幅（慎用，通常用于来电）
 
                 // 3. 发送
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-                    == PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    )
+                    == PackageManager.PERMISSION_GRANTED
+                ) {
                     // 权限已授予，执行逻辑
-                    NotificationManagerCompat.from(context).notify(System.currentTimeMillis().toInt(), builder.build())
+                    NotificationManagerCompat.from(context)
+                        .notify(System.currentTimeMillis().toInt(), builder.build())
                 } else {
                     // 权限未授予，去申请权限
                     Log.e(TAG, "没有发送消息的权限")
@@ -129,6 +151,26 @@ class CommonUtils {
             } catch (e: Exception) {
                 Log.e(TAG, "消息处理异常" + e.message)
             }
+        }
+
+        /**
+         * 接受音频文件并存储
+         * 返回存储文件对象
+         */
+        suspend fun fileVoice(context: Context, multipart: MultiPartData): File? {
+            var file: File? = null
+            multipart.forEachPart { part ->
+                if (part is PartData.FileItem) {
+                    // 保存到临时文件
+                    val fileName = "received_voice.m4a"
+                    file = File(context.cacheDir, fileName)
+                    part.streamProvider().use { input ->
+                        file?.outputStream()?.use { output -> input.copyTo(output) }
+                    }
+                }
+                part.dispose()
+            }
+            return file
         }
 
 

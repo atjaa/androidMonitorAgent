@@ -12,6 +12,9 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
+/**
+ * APP升级处理类
+ */
 class AppUpdateManager(private val context: Context) {
     private var downloadListener: DownloadListener? = null
     val TAG: String = "AppUpdateManager"

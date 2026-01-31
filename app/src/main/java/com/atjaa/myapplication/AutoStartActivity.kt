@@ -19,6 +19,10 @@ import com.atjaa.myapplication.utils.SpCacheUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import es.dmoral.toasty.Toasty
 
+/**
+ * 手动授权页面
+ * 手动授权成功后记录存储变量，升级或重启均可以跳过
+ */
 class AutoStartActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

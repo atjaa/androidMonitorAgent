@@ -14,6 +14,9 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.concurrent.TimeUnit
 
+/**
+ * 保活worker
+ */
 class ServiceCheckWorker(context: Context, workerParams: WorkerParameters) :
     Worker(context, workerParams) {
     val TAG: String = "MyAccessibilityService"

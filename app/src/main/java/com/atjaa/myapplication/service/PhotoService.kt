@@ -29,6 +29,9 @@ import com.atjaa.myapplication.bean.ConstConfig
 import com.atjaa.myapplication.utils.MonitorUtils
 
 
+/**
+ * 提供前置摄像头拍照服务
+ */
 class PhotoService : LifecycleService() {
     // 1. 定义一个 Binder 类，返回 Service 实例
     inner class LocalBinder : Binder() {

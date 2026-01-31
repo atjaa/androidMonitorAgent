@@ -26,6 +26,10 @@ import com.atjaa.myapplication.utils.SpCacheUtils
 import com.atjaa.myapplication.worker.AtjaaKeepAliveService
 import es.dmoral.toasty.Toasty
 
+/**
+ * 程序主入口
+ * 包括无障碍权限申请
+ */
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -26,11 +26,13 @@ import com.google.gson.Gson
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.net.URLEncoder
 import kotlin.text.startsWith
 import kotlin.text.substring
 
+/**
+ * 远程机器监控展示页面
+ */
 class AdminMonitorListActivity : AppCompatActivity() {
     lateinit var binding: ActivityAdminMonitorListBinding
     lateinit var ip: String

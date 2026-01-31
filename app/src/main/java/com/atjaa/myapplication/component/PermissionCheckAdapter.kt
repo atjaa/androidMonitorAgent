@@ -9,7 +9,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.atjaa.myapplication.R
 
-
+/**
+ * 页面操作类
+ */
 class PermissionCheckAdapter(private val mData: MutableList<HashMap<String, String>>) :
     RecyclerView.Adapter<PermissionCheckAdapter.MyViewHolder>() {
 

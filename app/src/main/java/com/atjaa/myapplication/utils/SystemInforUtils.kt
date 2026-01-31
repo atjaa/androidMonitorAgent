@@ -9,7 +9,9 @@ import com.atjaa.myapplication.bean.AppInforBean
 import java.util.Calendar
 import kotlin.properties.Delegates
 
-
+/**
+ * 监控信息处理工具类
+ */
 class SystemInforUtils {
     companion object {
         const val DAY: Int = 0

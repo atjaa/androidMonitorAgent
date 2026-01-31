@@ -3,6 +3,9 @@ package com.atjaa.myapplication.utils
 import android.content.Context
 import android.content.SharedPreferences
 
+/**
+ * 缓存工具类
+ */
 object SpCacheUtils {
     private const val PREF_NAME = "my_cache"
     private var sharedPreferences: SharedPreferences? = null

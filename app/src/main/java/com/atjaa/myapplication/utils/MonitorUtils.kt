@@ -1,24 +1,19 @@
 package com.atjaa.myapplication.utils
 
-import android.content.Context
+
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.text.format.DateUtils
 import android.util.Base64
-import androidx.annotation.RequiresApi
 import androidx.core.graphics.drawable.toBitmap
-import androidx.work.Constraints
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import com.atjaa.myapplication.bean.AppInforBean
-import com.atjaa.myapplication.worker.ServiceCheckWorker
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
-import java.util.concurrent.TimeUnit
 
+
+/**
+ * 监控数据处理工具类
+ */
 class MonitorUtils {
     companion object {
 

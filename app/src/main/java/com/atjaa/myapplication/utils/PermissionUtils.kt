@@ -11,9 +11,11 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.accessibility.AccessibilityManager
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 
+/**
+ * 授权判断工具类
+ */
 object PermissionUtils {
     /**
      * 检查特定的无障碍服务是否已开启

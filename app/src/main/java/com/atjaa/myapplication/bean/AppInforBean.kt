@@ -7,6 +7,9 @@ import android.graphics.drawable.Drawable
 import kotlin.jvm.Throws
 import kotlin.properties.Delegates
 
+/**
+ * 监控数据实体类
+ */
 class AppInforBean {
     lateinit var usageStats: UsageStats //应用信息存储包对象
     lateinit var packageName: String //包名称

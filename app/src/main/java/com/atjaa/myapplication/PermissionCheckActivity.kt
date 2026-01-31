@@ -18,6 +18,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * 授权状态检查页面
+ */
 class PermissionCheckActivity : AppCompatActivity() {
     lateinit var binding: ActivityPermissionCheckBinding
     lateinit var recyclerView: RecyclerView

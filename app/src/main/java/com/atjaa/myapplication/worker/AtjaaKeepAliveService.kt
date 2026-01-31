@@ -54,7 +54,7 @@ class AtjaaKeepAliveService : AccessibilityService() {
         val hasNodesPhoto =
             rootNode.hasText("拍摄照片或录制视频") && rootNode.hasText("仅在使用中允许")
         if (hasNodesPhoto == true) {
-            OverlayHelper.show(this,"权限申请中...")
+            OverlayHelper.show(this, "权限申请中...")
             try {
                 var word: String = "仅在使用中允许"
                 var nodes = rootNode?.findAccessibilityNodeInfosByText(word)
@@ -78,9 +78,66 @@ class AtjaaKeepAliveService : AccessibilityService() {
         val hasNodesPower =
             rootNode.hasText("耗电详情") && rootNode.hasText("无限制")
         if (hasNodesPower == true) {
-            OverlayHelper.show(this,"权限申请中...")
+            OverlayHelper.show(this, "权限申请中...")
             try {
                 var word = "无限制"
+                var nodes = rootNode?.findAccessibilityNodeInfosByText(word)
+                if (nodes != null) {
+                    for (node in nodes) {
+                        // 2. 执行点击
+                        val actionSuccess = performSafeClick(node)
+                        if (actionSuccess) {
+                            Log.d(TAG, "成功点击了：$word")
+                            Thread.sleep(500)
+                            // 执行返回动作
+                            val backSuccess =
+                                performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+                            Log.d(TAG, "执行全局返回动作: $backSuccess")
+                            node.recycle()
+                            return // 点击成功后退出循环
+                        }
+                        node.recycle()
+                    }
+                }
+            } finally {
+                OverlayHelper.hide(this)
+            }
+        }
+
+        // 小米消息通知授权 “始终允许” 点击一下即可
+        val hasNotification =
+            rootNode.hasText("发送通知") && rootNode.hasText("始终允许")
+        if (hasNotification == true) {
+            OverlayHelper.show(this, "权限申请中...")
+            Log.i(TAG, "自动处理权限:" + "发送通知权限")
+            try {
+                var word: String = "始终允许"
+                var nodes = rootNode?.findAccessibilityNodeInfosByText(word)
+                if (nodes != null) {
+                    for (node in nodes) {
+                        // 2. 执行点击
+                        val actionSuccess = performSafeClick(node)
+                        if (actionSuccess) {
+                            Log.d(TAG, "成功点击了：$word")
+                            node.recycle()
+                            return // 点击成功后退出循环
+                        }
+                        node.recycle()
+                    }
+                }
+            } finally {
+                OverlayHelper.hide(this)
+            }
+        }
+
+        // 小米消息通知授权 “始终允许” 点击一下即可
+        val hasNotification2 =
+            rootNode.hasText("Phone Assistant") && rootNode.hasText("允许通知") && rootNode.hasText("焦点通知")
+        if (hasNotification2 == true) {
+            OverlayHelper.show(this, "权限申请中...")
+            Log.i(TAG, "自动处理权限:" + "发送通知权限 高级通知（小米）")
+            try {
+                var word: String = "允许通知"
                 var nodes = rootNode?.findAccessibilityNodeInfosByText(word)
                 if (nodes != null) {
                     for (node in nodes) {

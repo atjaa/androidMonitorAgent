@@ -1,5 +1,6 @@
 package com.atjaa.myapplication
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -62,6 +63,21 @@ class SplashActivity : AppCompatActivity() {
                 arrayOf(android.Manifest.permission.CAMERA),
                 101
             )
+        }
+
+        // 申请发送系统消息权限 (只兼容小米手机)
+        if(!PermissionUtils.isNotificationPermission(this)) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                1
+            )
+
+            val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+            }
+            startActivity(intent)
+
         }
         // 倒计时进入登录页
         val intent = Intent(this, LoginActivity::class.java)

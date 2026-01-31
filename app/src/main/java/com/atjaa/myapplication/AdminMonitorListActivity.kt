@@ -3,6 +3,8 @@ package com.atjaa.myapplication
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.format.DateUtils
+import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.SimpleAdapter
@@ -18,9 +20,14 @@ import com.atjaa.myapplication.service.TextPreviewDialog
 import com.atjaa.myapplication.utils.HttpUtils
 import com.atjaa.myapplication.utils.SystemInforUtils
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
+import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.URLEncoder
 import kotlin.text.startsWith
 import kotlin.text.substring
 
@@ -28,6 +35,7 @@ class AdminMonitorListActivity : AppCompatActivity() {
     lateinit var binding: ActivityAdminMonitorListBinding
     lateinit var ip: String
     var type: Int = 0
+    val TAG = "AdminMonitorListActivity"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -67,6 +75,11 @@ class AdminMonitorListActivity : AppCompatActivity() {
                     true
                 }
 
+                R.id.menu_message -> {
+                    takeMessage()
+                    true
+                }
+
                 else -> false
             }
         }
@@ -75,6 +88,51 @@ class AdminMonitorListActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         initView(type)
+    }
+
+    fun takeMessage() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_input_text, null)
+        val editText = dialogView.findViewById<TextInputEditText>(R.id.et_content)
+
+        // 2. 构建并展示弹窗
+        MaterialAlertDialogBuilder(this)
+            .setTitle("发送消息")
+            .setView(dialogView)
+            .setPositiveButton("确认") { _, _ ->
+                val mes = editText.text.toString()
+                if (mes.isNotEmpty()) {
+                    Log.i(TAG, "发送消息到" + ip + ":" + mes)
+                    val encodedMes = URLEncoder.encode(mes, "UTF-8")
+                    var url =
+                        "http://" + ip + ":" + ConstConfig.PORT + "/monitor/message?m=" + encodedMes
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        try {
+                            var result = HttpUtils.fetchUrlContent(url)
+                            if (null != result && result.startsWith("ok#")) {
+                                Log.i(TAG, "消息发送成功")
+                                this@AdminMonitorListActivity.runOnUiThread {
+                                    Toasty.info(this@AdminMonitorListActivity, "消息已发送").show()
+                                }
+                            } else {
+                                Log.i(TAG, "消息发送失败")
+                                this@AdminMonitorListActivity.runOnUiThread {
+                                    Toasty.info(this@AdminMonitorListActivity, "消息发送失败")
+                                        .show()
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "消息发送失败" + e.message)
+                            this@AdminMonitorListActivity.runOnUiThread {
+                                Toasty.info(this@AdminMonitorListActivity, "消息发送失败").show()
+                            }
+                        }
+                    }
+                }
+            }
+            .setNegativeButton("取消") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     fun takePhoto() {

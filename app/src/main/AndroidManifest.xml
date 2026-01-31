@@ -20,6 +20,7 @@
     <uses-feature android:name="android.hardware.camera.any" /> <!-- 摄像头权限 -->
     <uses-permission android:name="android.permission.CAMERA" /> <!-- 摄像头权限 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" /> <!-- 摄像头权限 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- 消息权限 -->
     <!-- 存储权限：兼容低版本 -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -45,6 +46,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidMonitorAgent"
         android:usesCleartextTraffic="true">
+        <activity
+            android:name=".NotificationMessageActivity"
+            android:exported="false" />
         <activity
             android:name=".PermissionCheckActivity"
             android:exported="false" />

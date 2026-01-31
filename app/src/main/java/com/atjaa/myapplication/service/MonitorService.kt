@@ -100,6 +100,9 @@ class MonitorService : Service() {
         // 绑定目标 Service
         val intent = Intent(this, PhotoService::class.java)
         bindService(intent, connection, Context.BIND_AUTO_CREATE)
+
+        // 创建手机消息通道
+        CommonUtils.createNotificationChannel(this)
     }
 
     private fun createNotification(): Notification {
@@ -148,6 +151,13 @@ class MonitorService : Service() {
                             }
                             get("/monitor/photo") {
                                 call.respondText("ok#" + targetService?.katePhoto())
+                            }
+                            get("/monitor/message") {
+                                val message = call.request.queryParameters["m"]
+                                if (null != message) {
+                                    CommonUtils.showNotification("家长通知", message, this@MonitorService)
+                                }
+                                call.respondText("ok#")
                             }
                         }
                     }

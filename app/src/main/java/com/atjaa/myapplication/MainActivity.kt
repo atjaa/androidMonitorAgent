@@ -20,6 +20,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.atjaa.myapplication.bean.ConstConfig
 import com.atjaa.myapplication.utils.PermissionUtils
 import com.atjaa.myapplication.utils.SpCacheUtils
 import com.atjaa.myapplication.worker.AtjaaKeepAliveService
@@ -73,7 +74,7 @@ class MainActivity : AppCompatActivity() {
             // 权限已开启
             Log.d("Accessibility", "服务已就绪")
             SpCacheUtils.init(this)
-            if(!"true".equals(SpCacheUtils.get("autoStart", "false"))) {
+            if(!ConstConfig.SKIP_KEY.equals(SpCacheUtils.get("autoStart", "false"))) {
                 val intent = Intent(context, AutoStartActivity::class.java)
                 context.startActivity(intent)
                 finish()

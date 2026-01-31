@@ -27,7 +27,7 @@
     <androidx.appcompat.widget.AppCompatTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="本应用需要 自启动权限\n和使用情况访问权限\n如未开启请点击开启按钮进入开启页面"
+        android:text="本应用需要开启以下权限\n如未开启请点击开启按钮进入开启页面\n开启后点击跳过"
         android:gravity="center"
         android:paddingStart="20dp"
         android:textSize="18sp"
@@ -54,6 +54,19 @@
         android:text="开启使用情况访问"
         app:cornerRadius='8dp'
         android:onClick="autoAppInfo"
+        />
+    <!-- 暂时不用 -->
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:text="开启消息通知接受"
+        app:cornerRadius='8dp'
+        android:visibility="gone"
+        android:onClick="autoNotification"
         />
     <Button
         android:id="@+id/button2"

@@ -1,5 +1,6 @@
 package com.atjaa.myapplication.utils
 
+import android.Manifest
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.AppOpsManager
@@ -10,6 +11,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.accessibility.AccessibilityManager
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 
 object PermissionUtils {
@@ -87,5 +89,25 @@ object PermissionUtils {
             return true
         }
         return false
+    }
+
+    fun isNotificationPermission(context: Context): Boolean {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            return true
+        }
+        return false
+    }
+    fun isXiaomiFloatingEnabled(context: Context): Boolean {
+        val ops = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        try {
+            val method = ops.javaClass.getMethod("checkOp", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType, String::class.java)
+            // 10021 是小米私有的悬浮通知 Op 码
+            val result = method.invoke(ops, 10021, android.os.Process.myUid(), context.packageName) as Int
+            return result == AppOpsManager.MODE_ALLOWED
+        } catch (e: Exception) {
+            return false // 非小米或获取失败
+        }
     }
 }

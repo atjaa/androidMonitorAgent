@@ -8,18 +8,19 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.atjaa.myapplication.bean.ConstConfig
 import com.atjaa.myapplication.utils.PermissionUtils
 import com.atjaa.myapplication.utils.SpCacheUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import es.dmoral.toasty.Toasty
 
 class AutoStartActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -34,7 +35,7 @@ class AutoStartActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         SpCacheUtils.init(this)
-        if ("true".equals(SpCacheUtils.get("autoStart", "false"))) {
+        if (ConstConfig.SKIP_KEY.equals(SpCacheUtils.get("autoStart", "false"))) {
             val intent = Intent(this, SplashActivity::class.java)
             startActivity(intent)
             finish()
@@ -46,6 +47,16 @@ class AutoStartActivity : AppCompatActivity() {
      */
     fun autoStart(view: View) {
         requestAutoStart(this)
+    }
+
+    /**
+     * 拉起消息通知授权
+     */
+    fun autoNotification(view: View) {
+        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+            putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+        }
+        startActivity(intent)
     }
 
     fun autoAppInfo(view: View) {
@@ -75,7 +86,7 @@ class AutoStartActivity : AppCompatActivity() {
             .setPositiveButton("确定") { dialog, which ->
                 // 用户点了确定，跳转逻辑
                 SpCacheUtils.init(this)
-                SpCacheUtils.put("autoStart", "true")
+                SpCacheUtils.put("autoStart", ConstConfig.SKIP_KEY)
                 val intent = Intent(this, SplashActivity::class.java)
                 startActivity(intent)
                 finish()

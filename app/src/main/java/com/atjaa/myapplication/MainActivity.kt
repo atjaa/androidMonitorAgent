@@ -20,6 +20,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.atjaa.myapplication.utils.PermissionUtils
 import com.atjaa.myapplication.utils.SpCacheUtils
 import com.atjaa.myapplication.worker.AtjaaKeepAliveService
 import es.dmoral.toasty.Toasty
@@ -38,13 +39,13 @@ class MainActivity : AppCompatActivity() {
 
         val context = this
         // 无障碍保活权限  之后进入下一个页面，自动申请其他权限
-        if (!isAccessibilitySettingsOn(this, AtjaaKeepAliveService::class.java)) {
+        if (!PermissionUtils.isAccessibilitySettingsOn(this, AtjaaKeepAliveService::class.java)) {
             val accessibilityManager = getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
             // 注册监听器
             val stateChangeListener = AccessibilityManager.AccessibilityStateChangeListener { enabled ->
                 if (enabled) {
                     // 检查你的服务是否真的被开启了（因为其他应用开启也会触发此回调）
-                    if (isAccessibilitySettingsOn(this, AtjaaKeepAliveService::class.java)) {
+                    if (PermissionUtils.isAccessibilitySettingsOn(this, AtjaaKeepAliveService::class.java)) {
                         Log.d("Accessibility", "无障碍权限已激活！")
                         // 执行跳转回 App 的逻辑
                         val intent = Intent(context, AutoStartActivity::class.java).apply {
@@ -84,35 +85,6 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-    }
-    fun isAccessibilitySettingsOn(context: Context, service: Class<out AccessibilityService>): Boolean {
-        val serviceName = "${context.packageName}/${service.name}"
-        val enabledServices = Settings.Secure.getString(
-            context.contentResolver,
-            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-        ) ?: return false
-
-        // 使用冒号分割并检查
-        val colonSplitter = TextUtils.SimpleStringSplitter(':')
-        colonSplitter.setString(enabledServices)
-        while (colonSplitter.hasNext()) {
-            val componentName = colonSplitter.next()
-            // 兼容性判断：匹配全路径或简写路径
-            if (componentName.equals(serviceName, ignoreCase = true)) {
-                return true
-            }
-        }
-
-        // 二次检查：通过系统服务直接获取当前“活跃中”的服务列表（最准确）
-        val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
-        val enabledAppList = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_GENERIC)
-        for (info in enabledAppList) {
-            if (info.resolveInfo.serviceInfo.name == service.name) {
-                return true
-            }
-        }
-
-        return false
     }
 
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
@@ -30,32 +31,36 @@
             android:layout_height="wrap_content"
             android:text="Phone Assistant Update"
             android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:layout_marginBottom="32dp"
+            />
         <LinearLayout
             android:id="@+id/hostInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="32dp">
+            >
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ip_value"
                 android:layout_width="200dp"
-                android:layout_height="50dp"
+                android:layout_height="30dp"
                 android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:background="#DCDCEB"
-                android:ems="10"
-                android:inputType="numberPassword"
+                android:inputType="number"
+                android:digits="0123456789."
+                android:text="192.168.3.13"
+                android:gravity="center"
+                android:background="@drawable/bg_ip_input"
                 />
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/port_value"
                 android:layout_width="80dp"
-                android:layout_height="50dp"
+                android:layout_height="30dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
-                android:background="#DCDCEB"
-                android:ems="10"
-                android:inputType="numberPassword"
+                android:inputType="number"
+                android:gravity="center"
+                android:text="8080"
+                android:background="@drawable/bg_ip_input"
                 />
         </LinearLayout>
         <ProgressBar
@@ -79,6 +84,7 @@
             android:layout_height="wrap_content"
             android:text="检查并下载更新"
             android:textSize="18sp"
+            app:cornerRadius='8dp'
             android:padding="16dp" />
     </LinearLayout>
 

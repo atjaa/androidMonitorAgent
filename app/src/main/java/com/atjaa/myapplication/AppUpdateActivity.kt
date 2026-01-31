@@ -21,6 +21,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.atjaa.myapplication.databinding.ActivityAppUpdateBinding
 import com.atjaa.myapplication.service.AppUpdateManager
 import es.dmoral.toasty.Toasty
+import okhttp3.Protocol
 import java.io.File
 
 class AppUpdateActivity : AppCompatActivity(), AppUpdateManager.DownloadListener {
@@ -28,14 +29,16 @@ class AppUpdateActivity : AppCompatActivity(), AppUpdateManager.DownloadListener
     private lateinit var progressBar: ProgressBar
     private lateinit var statusText: TextView
     private lateinit var updateButton: Button
+    private lateinit var ipValue: TextView
+    private lateinit var portValue: TextView
     val TAG: String = "MyAccessibilityService"
 
     // 授权成功码
     private val PERMISSION_REQUEST_CODE = 1001
 
     // TODO 示例APK下载地址，请替换为实际地址
-    val downloadUrl = "http://192.168.3.13:8080/api/download/app-debug.apk"
-
+    val downloadUrl = "/api/download/app-debug.apk"
+    var protocol = "http://"
     lateinit var binding: ActivityAppUpdateBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +53,8 @@ class AppUpdateActivity : AppCompatActivity(), AppUpdateManager.DownloadListener
         progressBar = binding.progressBar
         statusText = binding.statusText
         updateButton = binding.updateButton
+        ipValue = binding.ipValue
+        portValue = binding.portValue
 
         appUpdateManager = AppUpdateManager(this)
         appUpdateManager.setDownloadListener(this)
@@ -60,10 +65,12 @@ class AppUpdateActivity : AppCompatActivity(), AppUpdateManager.DownloadListener
     }
 
     private fun checkPermissions() {
+        Log.i(TAG, "检查是否有存储权限")
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED
             ) {
+                Log.i(TAG, "没有存储权限，跳转申请页面")
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
@@ -76,6 +83,7 @@ class AppUpdateActivity : AppCompatActivity(), AppUpdateManager.DownloadListener
         // 2. 检查安装未知来源权限 (API 26+ 强制要求)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (!packageManager.canRequestPackageInstalls()) {
+                Log.i(TAG, "没有存储权限，跳转申请页面")
                 // 跳转到系统设置页让用户开启安装权限
                 val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
                     data = Uri.parse("package:$packageName")
@@ -84,7 +92,11 @@ class AppUpdateActivity : AppCompatActivity(), AppUpdateManager.DownloadListener
                 return
             }
         }
-        appUpdateManager.downloadApk(downloadUrl)
+        Log.i(
+            TAG,
+            "开始下载并更新应用：" + protocol + ipValue.text + ":" + portValue.text + downloadUrl
+        )
+        appUpdateManager.downloadApk(protocol + ipValue.text + ":" + portValue.text + downloadUrl)
     }
 
     /**
@@ -98,7 +110,7 @@ class AppUpdateActivity : AppCompatActivity(), AppUpdateManager.DownloadListener
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                appUpdateManager.downloadApk(downloadUrl)
+                appUpdateManager.downloadApk(protocol + ipValue.text + ":" + portValue.text + downloadUrl)
             } else {
                 Toasty.info(this, "需要存储权限才能下载更新", Toasty.LENGTH_SHORT).show()
             }
@@ -120,6 +132,7 @@ class AppUpdateActivity : AppCompatActivity(), AppUpdateManager.DownloadListener
         Log.e(TAG, "下载失败" + error)
         Toasty.info(this, error, Toasty.LENGTH_LONG).show()
     }
+
     fun back(view: View) {
         onBackPressedDispatcher.onBackPressed()
     }

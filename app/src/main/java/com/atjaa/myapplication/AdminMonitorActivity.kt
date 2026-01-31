@@ -36,7 +36,7 @@ class AdminMonitorActivity : AppCompatActivity() {
     private lateinit var floatingButton: Button
     private lateinit var toUpdate: Button
     private lateinit var toAbout: Button
-    private lateinit var toSecSettings: Button
+    private lateinit var toPermissionCheck: Button
     private lateinit var overlayLayout: LinearLayout
     private lateinit var additionalButtonsContainer: LinearLayout
     private lateinit var list: ListView
@@ -58,7 +58,7 @@ class AdminMonitorActivity : AppCompatActivity() {
         additionalButtonsContainer = binding.additionalButtonsContainer
         list = binding.list
         toUpdate = binding.toUpdate
-        toSecSettings = binding.toSecSettings
+        toPermissionCheck = binding.toPermissionCheck
         toAbout = binding.toAbout
 
         list.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
@@ -84,8 +84,9 @@ class AdminMonitorActivity : AppCompatActivity() {
             val intent = Intent(this, AppUpdateActivity::class.java)
             startActivity(intent)
         }
-        toSecSettings.setOnClickListener {
-            Toasty.info(this, "功能暂时未实现").show()
+        toPermissionCheck.setOnClickListener {
+            val intent = Intent(this, PermissionCheckActivity::class.java)
+            startActivity(intent)
         }
         toAbout.setOnClickListener {
             Toasty.info(this, "当前系统版本:" + CommonUtils.getAppVersion(this).second).show()

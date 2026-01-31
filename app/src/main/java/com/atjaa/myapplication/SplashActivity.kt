@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.atjaa.myapplication.databinding.ActivitySplashBinding
+import com.atjaa.myapplication.utils.PermissionUtils
 import es.dmoral.toasty.Toasty
 
 class SplashActivity : AppCompatActivity() {
@@ -41,7 +42,7 @@ class SplashActivity : AppCompatActivity() {
         var sleepTime: Long = 3000
         //  无障碍授权后，下面获取权限全部自动
         // 电源白名单，防止杀死
-        if (!isIgnoringBatteryOptimizations(this)) {
+        if (!PermissionUtils.isIgnoringBatteryOptimizations(this)) {
             val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
                 // 某些系统版本下可以定位到具体 App 的二级页面，但并非所有系统都支持
                 data = Uri.parse("package:$packageName")
@@ -54,9 +55,7 @@ class SplashActivity : AppCompatActivity() {
         }
 
         // 拍照权限
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
+        if (!PermissionUtils.isUsageCompat(this)) {
             // 权限未授予，需要请求权限
             ActivityCompat.requestPermissions(
                 this,
@@ -79,13 +78,6 @@ class SplashActivity : AppCompatActivity() {
             }
         }.start()
     }
-
-    fun isIgnoringBatteryOptimizations(context: Context): Boolean {
-        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        // 检查当前应用包名是否在白名单中
-        return powerManager.isIgnoringBatteryOptimizations(context.packageName)
-    }
-
 
 
 }

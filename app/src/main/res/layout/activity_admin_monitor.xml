@@ -56,16 +56,19 @@
     <!-- 悬浮按钮 -->
     <Button
         android:id="@+id/floating_button"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="0dp"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="24dp"
-        android:background="@drawable/circle_button"
-        android:elevation="8dp"
+        android:backgroundTint="#444444"
+        android:elevation="4dp"
         android:text="+"
-        android:textColor="@android:color/white"
+        android:textColor="#FFFFFF"
         android:textSize="24sp" />
     <!-- 弹层背景 -->
     <LinearLayout
@@ -91,31 +94,67 @@
         android:visibility="gone">
         <com.google.android.material.button.MaterialButton
             android:id="@+id/to_update"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
             android:text="更新应用"
             app:icon="@android:drawable/ic_popup_sync"
-            app:iconGravity="start"
-            app:iconPadding="8dp" />
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/to_Sec_Settings"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="安全设置"
-            app:icon="@android:drawable/stat_notify_error"
-            app:iconGravity="start"
-            app:iconPadding="8dp" />
+            android:layout_margin="0dp"
+            android:gravity="start|center_vertical"
+            android:textColor="#333333"
+            android:textSize="15sp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            app:iconSize="20dp"
+            app:iconPadding="12dp"
+            app:iconTint="#555555"
+            app:rippleColor="#D9D9D9"
+            />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_marginHorizontal="12dp"
+            android:background="#EEEEEE" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/to_permission_check"
+            app:icon="@android:drawable/ic_menu_search"
+            android:text="授权检查"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:gravity="start|center_vertical"
+            android:textColor="#333333"
+            android:textSize="15sp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            app:iconSize="20dp"
+            app:iconPadding="12dp"
+            app:iconTint="#555555"
+            app:rippleColor="#D9D9D9" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_marginHorizontal="12dp"
+            android:background="#EEEEEE" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/to_about"
+            android:text="应用版本"
+            app:icon="@android:drawable/ic_dialog_alert"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="应用版本"
-            app:icon="@android:drawable/ic_menu_info_details"
-            app:iconGravity="start"
-            app:iconPadding="8dp" />
+            android:layout_margin="0dp"
+            android:gravity="start|center_vertical"
+            android:textColor="#333333"
+            android:textSize="15sp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            app:iconSize="20dp"
+            app:iconPadding="12dp"
+            app:iconTint="#555555"
+            app:rippleColor="#D9D9D9"
+            />
     </LinearLayout>
 
 </RelativeLayout>

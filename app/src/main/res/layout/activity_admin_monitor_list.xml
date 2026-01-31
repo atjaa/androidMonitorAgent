@@ -40,7 +40,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:padding="5dp"
-            android:textColor="#0000dd"
             tools:text="总运行时长:" />
 
         <TextView
@@ -49,7 +48,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:padding="5dp"
-            android:textColor="#0000dd"
             tools:text="操作总次数:" />
     </LinearLayout>
     <LinearLayout

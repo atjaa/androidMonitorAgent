@@ -14,6 +14,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.atjaa.myapplication.utils.PermissionUtils
 import com.atjaa.myapplication.utils.SpCacheUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import es.dmoral.toasty.Toasty
@@ -49,7 +50,7 @@ class AutoStartActivity : AppCompatActivity() {
 
     fun autoAppInfo(view: View) {
         // 获取查看其他APP状态的权限
-        if (!hasUsageStatsPermission(this)) {
+        if (!PermissionUtils.hasUsageStatsPermission(this)) {
             val intent = Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
                 // 某些系统版本下可以定位到具体 App 的二级页面，但并非所有系统都支持
                 // data = Uri.fromParts("package", packageName, null)
@@ -133,29 +134,5 @@ class AutoStartActivity : AppCompatActivity() {
             detailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(detailIntent)
         }
-    }
-
-    fun hasUsageStatsPermission(context: Context): Boolean {
-        val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-
-        // unsafeCheckOpNoThrow 是 API 29 后的推荐做法
-        val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // API 29 及以上使用 unsafeCheckOpNoThrow
-            appOps.unsafeCheckOpNoThrow(
-                AppOpsManager.OPSTR_GET_USAGE_STATS,
-                android.os.Process.myUid(),
-                packageName
-            )
-        } else {
-            // API 29 以下使用老的 checkOpNoThrow
-            @Suppress("DEPRECATION")
-            appOps.checkOpNoThrow(
-                AppOpsManager.OPSTR_GET_USAGE_STATS,
-                android.os.Process.myUid(),
-                packageName
-            )
-        }
-
-        return mode == AppOpsManager.MODE_ALLOWED
     }
 }

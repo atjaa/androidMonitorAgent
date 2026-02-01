@@ -177,12 +177,18 @@ class MonitorService : Service() {
                                 call.respondText("ok#")
                             }
                             post("/monitor/voice") {
-                                val multipart = call.receiveMultipart()
-                                var file = CommonUtils.fileVoice(this@MonitorService, multipart)
-                                if (file != null) {
-                                    Log.i(TAG, "收到音频文件准备播放")
-                                    playReceivedVoice(file!!.absolutePath)
-                                    call.respondText("ok#")
+                                Log.i(TAG, "收到音频文件请求，开始读流")
+                                try {
+                                    val multipart = call.receiveMultipart()
+                                    var file = CommonUtils.fileVoice(this@MonitorService, multipart)
+                                    if (file != null) {
+                                        Log.i(TAG, "音频文件下载完成准备播放")
+                                        playReceivedVoice(file!!.absolutePath)
+                                        call.respondText("ok#")
+                                        // TODO 是否需要删除音频文件？
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "音频文件下载完播放异常" + e.message)
                                 }
                             }
                         }
@@ -213,7 +219,7 @@ class MonitorService : Service() {
     /**
      * 播放语音文件
      */
-    fun playReceivedVoice(path: String){
+    fun playReceivedVoice(path: String) {
         val mediaPlayer = MediaPlayer()
         mediaPlayer.setDataSource(path)
         // 建议设置为语音模式，这样声音会走媒体通道

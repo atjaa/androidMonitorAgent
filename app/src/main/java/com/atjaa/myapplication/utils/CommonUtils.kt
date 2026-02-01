@@ -27,7 +27,7 @@ import com.atjaa.myapplication.worker.ServiceCheckWorker
 import io.ktor.http.content.MultiPartData
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
-import io.ktor.http.content.streamProvider
+import io.ktor.utils.io.jvm.javaio.copyTo
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -160,15 +160,15 @@ class CommonUtils {
         suspend fun fileVoice(context: Context, multipart: MultiPartData): File? {
             var file: File? = null
             multipart.forEachPart { part ->
-                if (part is PartData.FileItem) {
-                    // 保存到临时文件
-                    val fileName = "received_voice.m4a"
-                    file = File(context.cacheDir, fileName)
-                    part.streamProvider().use { input ->
-                        file?.outputStream()?.use { output -> input.copyTo(output) }
+                when (part) {
+                    is PartData.FileItem -> {
+                        val input = part.provider()
+                        val fileName = "voice_${System.currentTimeMillis()}.m4a"
+                        file = File(context.cacheDir, fileName)
+                        input.copyTo(file.outputStream())
                     }
+                    else -> part.dispose()
                 }
-                part.dispose()
             }
             return file
         }

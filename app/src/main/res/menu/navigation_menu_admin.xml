@@ -6,13 +6,13 @@
     <item android:id="@+id/menu_week"
         android:icon="@android:drawable/ic_menu_week"
         android:title="Week" />
-    <item android:id="@+id/menu_month"
-        android:icon="@android:drawable/ic_menu_month"
-        android:title="Month" />
     <item android:id="@+id/menu_photo"
         android:icon="@android:drawable/presence_video_busy"
         android:title="前拍" />
     <item android:id="@+id/menu_message"
         android:icon="@android:drawable/ic_dialog_email"
         android:title="发消息" />
+    <item android:id="@+id/menu_voice"
+        android:icon="@android:drawable/ic_btn_speak_now"
+        android:title="发语音" />
 </menu>

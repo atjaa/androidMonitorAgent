@@ -54,6 +54,38 @@ class MonitorUtils {
             return dataList
         }
 
+        fun getData(
+            showInfoBean: AppInforBean,
+            outType: Int
+        ): Map<String, Any> {
+            val map: MutableMap<String, Any> = HashMap<String, Any>()
+            if (outType == 0) {
+                map.put("icon", showInfoBean.icon)
+            } else {
+                if (showInfoBean.icon != null) {
+                    // 将 Drawable 转换为 Bitmap
+                    val bitmap = showInfoBean.icon!!.toBitmap()
+                    map.put("icon", bitmapToBase64(bitmap))
+                }
+
+            }
+            map.put("name", showInfoBean.appName)
+            if (showInfoBean.usedTimes != 0L) {
+                map.put(
+                    "usedTime",
+                    "运行时长: " + DateUtils.formatElapsedTime(showInfoBean.usedTimes / 1000)
+                )
+            } else {
+                map.put(
+                    "usedTime",
+                    "运行时长: 0"
+                )
+            }
+            map.put("lastTime", "最近使用时间点: " + getTimeStrings(showInfoBean.beginPlayTime))
+            map.put("playNumber", "本次开机操作次数: " + showInfoBean.usedNumbers)
+            return map
+        }
+
         fun bitmapToBase64(bitmap: Bitmap): String {
             val scaledBitmap = if (bitmap.width > 128 || bitmap.height > 128) {
                 Bitmap.createScaledBitmap(bitmap, 128, 128, true)

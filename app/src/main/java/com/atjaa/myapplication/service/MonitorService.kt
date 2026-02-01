@@ -5,6 +5,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.app.usage.UsageStatsManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -20,6 +21,7 @@ import android.text.format.DateUtils
 import android.util.Log
 
 import androidx.core.app.NotificationCompat
+import com.atjaa.myapplication.bean.AppInforBean
 
 import com.atjaa.myapplication.bean.ConstConfig
 import com.atjaa.myapplication.utils.CommonUtils
@@ -191,6 +193,11 @@ class MonitorService : Service() {
                             get("/monitor/month") {
                                 call.respondText("ok#" + getMonitorInfo(2))
                             }
+
+                            get("/monitor/current") {
+                                call.respondText("ok#" + getForegroundApp())
+                            }
+
                             get("/monitor/photo") {
                                 call.respondText("ok#" + targetService?.takePhoto())
                             }
@@ -320,6 +327,25 @@ class MonitorService : Service() {
             (Settings.Secure.getString(context.contentResolver, "bluetooth_name")
                 ?: "Unknown Device") + screenStr
         }
+    }
+
+    fun getForegroundApp(): String? {
+        val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        val endTime = System.currentTimeMillis()
+        val startTime = endTime - 1000 * 60 // 查询最近 1 分钟
+
+        // 获取统计列表
+        val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
+
+        if (stats != null && stats.isNotEmpty()) {
+            // 按最后使用时间排序
+            val sortedStats = stats.sortedByDescending { it.lastTimeUsed }
+            var appInforBean = AppInforBean(sortedStats[0], this)
+            if (appInforBean.isSuccess) {
+                return Gson().toJson( MonitorUtils.getData(appInforBean, 1))
+            }
+        }
+        return "null"
     }
 
 

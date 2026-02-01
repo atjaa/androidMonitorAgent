@@ -12,8 +12,6 @@ import android.graphics.Matrix
 import android.os.Binder
 import android.os.IBinder
 import android.util.Log
-import android.os.Handler
-import android.os.Looper
 import android.os.PowerManager
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.CameraState
@@ -25,7 +23,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleService
-import com.atjaa.myapplication.bean.ConstConfig
 import com.atjaa.myapplication.utils.MonitorUtils
 
 
@@ -51,7 +48,7 @@ class PhotoService : LifecycleService() {
         startForeground(1, createNotification())
     }
 
-    fun katePhoto(): String {
+    fun takePhoto(): String {
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         val isScreenOn = pm.isInteractive // 屏幕是否亮着
         if(!isScreenOn){

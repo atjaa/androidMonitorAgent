@@ -1,6 +1,5 @@
 package com.atjaa.myapplication
 
-import android.app.AppOpsManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent

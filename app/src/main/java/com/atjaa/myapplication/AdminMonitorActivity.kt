@@ -24,7 +24,6 @@ import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.Inet4Address
@@ -102,6 +101,9 @@ class AdminMonitorActivity : AppCompatActivity() {
         onBackPressedDispatcher.onBackPressed()
     }
 
+    /**
+     * 获取开发监听端口的机器列表
+     */
     fun scan(view: View) {
         val bScan = binding.bScan
         val list = binding.list
@@ -160,6 +162,9 @@ class AdminMonitorActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * 获取主机信息
+     */
     suspend fun getInfoList(openIps: List<String>, localIp: String): List<Map<String, Any>> {
         var dataList: MutableList<Map<String, Any>> = ArrayList<Map<String, Any>>()
         if (null != openIps && openIps.size > 0) {

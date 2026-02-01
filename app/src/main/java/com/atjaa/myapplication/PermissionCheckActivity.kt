@@ -90,6 +90,22 @@ class PermissionCheckActivity : AppCompatActivity() {
                 safeUpdateAndNotify(item5, if (isUsageCompat) "通过" else "未开启")
                 delay(500)
 
+                // --- 6. 检查消息渠道授权 ---
+                val item6 = hashMapOf("tvCheck" to "检查消息渠道授权", "tvCheckResult" to "......")
+                safeAddAndNotify(item6)
+                delay(500)
+                val isNotificationPermission = PermissionUtils.isNotificationPermission(this@PermissionCheckActivity)
+                safeUpdateAndNotify(item6, if (isNotificationPermission) "通过" else "未开启")
+                delay(500)
+
+                // --- 7. 检查消息渠道授权 ---
+                val item7 = hashMapOf("tvCheck" to "检查小米私有悬浮通知授权", "tvCheckResult" to "......")
+                safeAddAndNotify(item7)
+                delay(500)
+                val isXiaomiFloatingEnabled = PermissionUtils.isXiaomiFloatingEnabled(this@PermissionCheckActivity)
+                safeUpdateAndNotify(item7, if (isXiaomiFloatingEnabled) "通过" else "未开启")
+                delay(500)
+
             }
         }
 

@@ -1,6 +1,7 @@
 package com.atjaa.myapplication.worker
 
 import android.accessibilityservice.AccessibilityService
+import android.annotation.SuppressLint
 
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
@@ -14,6 +15,7 @@ import com.atjaa.myapplication.utils.OverlayHelper
  * 1、提供保活
  * 2、进行自动授权
  */
+@SuppressLint("AccessibilityPolicy")
 class AtjaaKeepAliveService : AccessibilityService() {
 
     val TAG: String = "MyAccessibilityService"
@@ -52,6 +54,9 @@ class AtjaaKeepAliveService : AccessibilityService() {
         Log.d(TAG, "AtjaaKeepAliveService无障碍服务已连接")
     }
 
+    /**
+     * 无障碍触发方法
+     */
     fun handleAutoClick(event: AccessibilityEvent) {
         val rootNode: AccessibilityNodeInfo? = rootInActiveWindow
         // TODO 性能需要优化
@@ -79,7 +84,7 @@ class AtjaaKeepAliveService : AccessibilityService() {
                 OverlayHelper.hide(this)
             }
         }
-        // 小米手机耗电详情 “无限制” 点击后还要点返回
+        // 小米手机耗电详情 “无限制” 点击后还要点返回（与WakeLock重复，WakeLock只保持1小时这个比较久）
         val hasNodesPower =
             rootNode.hasText("耗电详情") && rootNode.hasText("无限制")
         if (hasNodesPower == true) {

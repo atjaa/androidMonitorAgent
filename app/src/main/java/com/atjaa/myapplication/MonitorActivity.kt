@@ -10,13 +10,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.atjaa.myapplication.bean.AppInforBean
 import com.atjaa.myapplication.databinding.ActivityMonitorBinding
 import com.atjaa.myapplication.utils.MonitorUtils
 import com.atjaa.myapplication.utils.SystemInforUtils
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import es.dmoral.toasty.Toasty
-import java.text.SimpleDateFormat
 
 
 /**

@@ -5,7 +5,7 @@ package com.atjaa.myapplication.bean
  */
 class ConstConfig {
     companion object {
-        const val PORT: Int = 33789
-        const val SKIP_KEY = "V100"
+        const val PORT: Int = 33789  // HTTP服务监控端口
+        const val SKIP_KEY = "V100"  // 授权跳过判断码
     }
 }

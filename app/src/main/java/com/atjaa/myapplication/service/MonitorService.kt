@@ -11,6 +11,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.media.AudioAttributes
 import android.media.MediaPlayer
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
@@ -47,6 +48,7 @@ class MonitorService : Service() {
 
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private lateinit var wakeLock: PowerManager.WakeLock
+    private lateinit var wifiLock: WifiManager.WifiLock
 
     // 提供http服务
     private var server: EmbeddedServer<CIOApplicationEngine, CIOApplicationEngine.Configuration>? =
@@ -54,9 +56,10 @@ class MonitorService : Service() {
     private var targetService: PhotoService? = null
     private var isBound = false
     val TAG: String = "MonitorService"
+
+    // 拍照服务连接器
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            //  获取 TargetService 实例
             val binder = service as PhotoService.LocalBinder
             targetService = binder.getService()
             isBound = true
@@ -71,21 +74,6 @@ class MonitorService : Service() {
         TODO("Return the communication channel to the service.")
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // 1. 针对 Android 14+，必须在 5 秒内关联前台通知
-        // 假设你已经创建了 Notification
-        startForeground(1, createNotification())
-
-        // 2. 如果是重启的情况，intent 会是 null
-        if (intent == null) {
-            // 在这里重新启动你的 Socket 监听或消息接收逻辑
-            startTcpServer(ConstConfig.PORT)
-        }
-
-        // 3. 返回 START_STICKY 告知系统：若被杀，请尝试重启我
-        return START_STICKY;
-    }
-
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
         super.onCreate()
@@ -95,21 +83,62 @@ class MonitorService : Service() {
             // 参数二：自定义标签，建议包含包名便于调试
             wakeLock = powerManager.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK,
-                "Phone Assistant:RemoteMessagingWakeLock"
+                "Phone Assistant:wakeLock"
             )
         }
+        val wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
+        wifiLock =
+            wifiManager.createWifiLock(
+                WifiManager.WIFI_MODE_FULL_HIGH_PERF,
+                "Phone Assistant:wifiLock"
+            )
+
         // 立即创建通知并启动前台服务 (适配 Android 8.0+)
         startForeground(1, createNotification())
 
-        // 开启线程监听端口
+        // 开启HTTP线程监听端口
         startTcpServer(ConstConfig.PORT)
-        CommonUtils.scheduleServiceCheck(this)
-        // 绑定目标 Service
+        // 绑定目标 拍照服务
         val intent = Intent(this, PhotoService::class.java)
         bindService(intent, connection, Context.BIND_AUTO_CREATE)
 
         // 创建手机消息通道
         CommonUtils.createNotificationChannel(this)
+        // 使用Worker能力保活本服务 15分钟保活一次
+        CommonUtils.scheduleServiceCheck(this)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // 启动前台服务，需要创建notification
+        startForeground(1, createNotification())
+
+        // 重启判断
+        if (intent == null) {
+            // 在这里重新启动你的 Socket 监听或消息接收逻辑
+            startTcpServer(ConstConfig.PORT)
+        }
+        try {
+            // 熄屏保持 开启电源白名单这里没有太大意义了，电源白名单后续优化可以关闭
+            wakeLock?.acquire(60 * 60 * 1000L)
+            wifiLock?.acquire()
+        } catch (e: Exception) {
+            Log.e(TAG, "Lock启动异常" + e.message)
+        }
+        //返回 START_STICKY 告知系统：若被杀，请尝试重启我
+        return START_STICKY;
+    }
+
+
+    override fun onDestroy() {
+        if (wakeLock?.isHeld == true) {
+            wakeLock?.release()
+        }
+        if(wifiLock?.isHeld == true) {
+            wifiLock?.release()
+        }
+        server?.stop(1000, 2000)
+        serviceScope.cancel()
+        super.onDestroy()
     }
 
     /**
@@ -163,7 +192,7 @@ class MonitorService : Service() {
                                 call.respondText("ok#" + getMonitorInfo(2))
                             }
                             get("/monitor/photo") {
-                                call.respondText("ok#" + targetService?.katePhoto())
+                                call.respondText("ok#" + targetService?.takePhoto())
                             }
                             get("/monitor/message") {
                                 val message = call.request.queryParameters["m"]
@@ -194,7 +223,7 @@ class MonitorService : Service() {
                         }
                     }
 
-                    // 2. 关键点：这里 wait 必须设为 false 才能继续后续逻辑判断
+                    // 这里 wait 必须设为 false 才能继续后续逻辑判断
                     server?.start(wait = false)
 
                     isStarted = true
@@ -291,12 +320,6 @@ class MonitorService : Service() {
             (Settings.Secure.getString(context.contentResolver, "bluetooth_name")
                 ?: "Unknown Device") + screenStr
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        server?.stop(1000, 2000)
-        serviceScope.cancel()
     }
 
 

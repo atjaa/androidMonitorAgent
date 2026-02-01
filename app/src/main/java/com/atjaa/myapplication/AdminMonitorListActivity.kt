@@ -282,39 +282,6 @@ class AdminMonitorListActivity : AppCompatActivity() {
     }
 
     /**
-     * 发送语音
-     */
-    fun takeVoice() {
-
-        var url = "http://" + ip + ":" + ConstConfig.PORT + "/monitor/photo"
-        lifecycleScope.launch(Dispatchers.IO) {
-            var result = HttpUtils.fetchUrlContent(url)
-            if (null != result && result.startsWith("ok#")) {
-                var dataStr = result.substring(3)
-                if (dataStr.startsWith("手机")) {
-                    runOnUiThread {
-                        TextPreviewDialog(dataStr).show(supportFragmentManager, "preview")
-                    }
-                } else {
-                    val decodedBytes =
-                        android.util.Base64.decode(dataStr, android.util.Base64.DEFAULT)
-                    val bitmap = android.graphics.BitmapFactory.decodeByteArray(
-                        decodedBytes,
-                        0,
-                        decodedBytes.size
-                    )
-
-                    if (bitmap != null) {
-                        runOnUiThread {
-                            ImagePreviewDialog(bitmap).show(supportFragmentManager, "preview")
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * 获取监控数据
      */
     fun initView(type: Int) {

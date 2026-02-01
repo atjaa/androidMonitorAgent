@@ -1,30 +1,19 @@
 package com.atjaa.myapplication
 
-import android.accessibilityservice.AccessibilityService
-import android.accessibilityservice.AccessibilityServiceInfo
-import android.app.AppOpsManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.PowerManager
 import android.provider.Settings
-import android.text.TextUtils
 import android.util.Log
 import android.view.accessibility.AccessibilityManager
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.atjaa.myapplication.bean.ConstConfig
 import com.atjaa.myapplication.utils.PermissionUtils
 import com.atjaa.myapplication.utils.SpCacheUtils
 import com.atjaa.myapplication.worker.AtjaaKeepAliveService
-import es.dmoral.toasty.Toasty
 
 /**
  * 程序主入口

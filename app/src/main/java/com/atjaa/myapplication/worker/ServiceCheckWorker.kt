@@ -4,15 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.atjaa.myapplication.bean.ConstConfig
 import com.atjaa.myapplication.service.MonitorService
 import java.net.InetSocketAddress
 import java.net.Socket
-import java.util.concurrent.TimeUnit
 
 /**
  * 保活worker
@@ -40,13 +37,6 @@ class ServiceCheckWorker(context: Context, workerParams: WorkerParameters) :
         } else {
             Log.i(TAG, "保活检查成功")
         }
-
-        // 测试使用开始，看下保活是否可用
-//        val nextRequest = OneTimeWorkRequestBuilder<ServiceCheckWorker>()
-//            .setInitialDelay(20, TimeUnit.SECONDS)
-//            .build()
-//        WorkManager.getInstance(applicationContext).enqueue(nextRequest)
-        // 测试使用结束，看下保活是否可用
         return Result.success()
     }
 

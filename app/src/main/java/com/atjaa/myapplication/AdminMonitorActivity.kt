@@ -232,7 +232,7 @@ class AdminMonitorActivity : AppCompatActivity() {
         return@withContext openIps // 此时 openIps 已填充完毕
     }
 
-    private fun isPortOpen(ip: String, port: Int, timeout: Int = 200): Boolean {
+    private fun isPortOpen(ip: String, port: Int, timeout: Int = 1000): Boolean {
         return try {
             val socket = Socket()
             socket.connect(InetSocketAddress(ip, port), timeout)

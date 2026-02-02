@@ -64,8 +64,11 @@ class MonitorUtils {
             } else {
                 if (showInfoBean.icon != null) {
                     // 将 Drawable 转换为 Bitmap
-                    val bitmap = showInfoBean.icon!!.toBitmap()
-                    map.put("icon", bitmapToBase64(bitmap))
+                    try {
+                        val bitmap = showInfoBean.icon!!.toBitmap()
+                        map.put("icon", bitmapToBase64(bitmap))
+                    } catch (e: Exception) {
+                    }
                 }
 
             }

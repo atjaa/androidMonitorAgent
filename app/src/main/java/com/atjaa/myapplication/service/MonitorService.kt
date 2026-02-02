@@ -9,6 +9,7 @@ import android.app.usage.UsageStatsManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.media.AudioAttributes
 import android.media.MediaPlayer
@@ -24,10 +25,13 @@ import androidx.core.app.NotificationCompat
 import com.atjaa.myapplication.bean.AppInforBean
 
 import com.atjaa.myapplication.bean.ConstConfig
+import com.atjaa.myapplication.receiver.InstallReceiver
 import com.atjaa.myapplication.utils.CommonUtils
 import com.atjaa.myapplication.utils.MonitorUtils
+import com.atjaa.myapplication.utils.SpCacheUtils
 import com.atjaa.myapplication.utils.SystemInforUtils
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import es.dmoral.toasty.Toasty
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
@@ -49,6 +53,7 @@ import kotlinx.coroutines.launch
 class MonitorService : Service() {
 
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val installReceiver = InstallReceiver()
     private lateinit var wakeLock: PowerManager.WakeLock
     private lateinit var wifiLock: WifiManager.WifiLock
 
@@ -95,19 +100,28 @@ class MonitorService : Service() {
                 "Phone Assistant:wifiLock"
             )
 
-        // 立即创建通知并启动前台服务 (适配 Android 8.0+)
+        Log.i(TAG,"【onCreate】立即创建通知并启动前台服务 (适配 Android 8.0+)")
         startForeground(1, createNotification())
 
-        // 开启HTTP线程监听端口
+        Log.i(TAG,"【onCreate】开启HTTP线程监听端口")
         startTcpServer(ConstConfig.PORT)
-        // 绑定目标 拍照服务
+
+        Log.i(TAG,"【onCreate】绑定目标 拍照服务")
         val intent = Intent(this, PhotoService::class.java)
         bindService(intent, connection, Context.BIND_AUTO_CREATE)
 
-        // 创建手机消息通道
+        Log.i(TAG,"【onCreate】创建手机消息通道")
         CommonUtils.createNotificationChannel(this)
-        // 使用Worker能力保活本服务 15分钟保活一次
+
+        Log.i(TAG,"【onCreate】启动Worker能力保活本服务 15分钟保活一次")
         CommonUtils.scheduleServiceCheck(this)
+
+        Log.i(TAG,"【onCreate】动态注册软件安装广播接收器")
+        val filter = IntentFilter(Intent.ACTION_PACKAGE_ADDED).apply {
+            addDataScheme("package")
+        }
+        // installReceiver 是类成员变量，确保全局唯一
+        registerReceiver(installReceiver, filter)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -117,12 +131,16 @@ class MonitorService : Service() {
         // 重启判断
         if (intent == null) {
             // 在这里重新启动你的 Socket 监听或消息接收逻辑
+            Log.i(TAG,"【onStartCommand】启动HTTP线程监听端口")
             startTcpServer(ConstConfig.PORT)
         }
         try {
             // 熄屏保持 开启电源白名单这里没有太大意义了，电源白名单后续优化可以关闭
-            wakeLock?.acquire(60 * 60 * 1000L)
-            wifiLock?.acquire()
+//            暂时注释，原因是小米手机
+//            (packageName=com.atjaa.myapplication, userId=0)'s appop state for runtime op android:nearby_wifi_devices should not be set directly.
+//            可能有关
+//            wakeLock?.acquire(60 * 60 * 1000L)
+//            wifiLock?.acquire()
         } catch (e: Exception) {
             Log.e(TAG, "Lock启动异常" + e.message)
         }
@@ -132,12 +150,18 @@ class MonitorService : Service() {
 
 
     override fun onDestroy() {
-        if (wakeLock?.isHeld == true) {
-            wakeLock?.release()
+        try {
+            unregisterReceiver(installReceiver)
+        } catch (e: Exception) {
+            Log.e(TAG, "注销异常: ${e.message}")
         }
-        if(wifiLock?.isHeld == true) {
-            wifiLock?.release()
-        }
+
+//        if (wakeLock?.isHeld == true) {
+//            wakeLock?.release()
+//        }
+//        if (wifiLock?.isHeld == true) {
+//            wifiLock?.release()
+//        }
         server?.stop(1000, 2000)
         serviceScope.cancel()
         super.onDestroy()
@@ -166,12 +190,6 @@ class MonitorService : Service() {
     private fun startTcpServer(port: Int) {
         serviceScope.launch(Dispatchers.IO) {
             // 测试wifi切换不影响服务，只要保活
-            // 无论第一次启动，还是被杀重启，先清理服务
-            try {
-                server?.stop(1000, 2000)
-            } catch (e: Exception) {
-                Log.e(TAG, "首先尝试STOP HTTP" + e)
-            }
             var isStarted = false
             var retryCount = 0
             val maxRetries = 5
@@ -195,7 +213,7 @@ class MonitorService : Service() {
                             }
 
                             get("/monitor/current") {
-                                call.respondText("ok#" + getForegroundApp())
+                                call.respondText("ok#" + getPhoneInfo())
                             }
 
                             get("/monitor/photo") {
@@ -329,23 +347,59 @@ class MonitorService : Service() {
         }
     }
 
-    fun getForegroundApp(): String? {
+
+    fun getPhoneInfo(): String? {
+        val map: MutableMap<String, MutableList<Map<String, Any>>> =
+            HashMap<String, MutableList<Map<String, Any>>>()
+        var beanMap = getForegroundApp()
+        if (null != beanMap) {
+            map.put("currentApp", beanMap)
+        }
+        var appAdd = getAppAddInfo()
+        if (null != appAdd) {
+            map.put("appAddInfo", appAdd)
+        }
+        return Gson().toJson(map)
+    }
+
+    /**
+     * 获取当前运行APP
+     */
+    fun getForegroundApp(): MutableList<Map<String, Any>>? {
         val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
         val endTime = System.currentTimeMillis()
         val startTime = endTime - 1000 * 60 // 查询最近 1 分钟
-
         // 获取统计列表
-        val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
+        val stats =
+            usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
 
         if (stats != null && stats.isNotEmpty()) {
             // 按最后使用时间排序
             val sortedStats = stats.sortedByDescending { it.lastTimeUsed }
             var appInforBean = AppInforBean(sortedStats[0], this)
             if (appInforBean.isSuccess) {
-                return Gson().toJson( MonitorUtils.getData(appInforBean, 1))
+                var data: MutableList<Map<String, Any>> = ArrayList<Map<String, Any>>()
+                var beanMap = MonitorUtils.getData(appInforBean, 1)
+                data.add(beanMap)
+                return data
             }
         }
-        return "null"
+        return null
+    }
+
+    /**
+     * 获取应用安装日志
+     */
+    fun getAppAddInfo(): MutableList<Map<String, Any>>? {
+        SpCacheUtils.init(this)
+        var appAddInfo = SpCacheUtils.get("appAddInfo")
+        if ("".equals(appAddInfo)) {
+            return null
+        } else {
+            val type = object : TypeToken<MutableList<Map<String, Any>>>() {}.type
+            val data: MutableList<Map<String, Any>> = Gson().fromJson(appAddInfo, type)
+            return data
+        }
     }
 
 

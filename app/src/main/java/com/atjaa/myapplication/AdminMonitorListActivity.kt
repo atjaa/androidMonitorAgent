@@ -49,7 +49,7 @@ class AdminMonitorListActivity : AppCompatActivity() {
     var type: Int = 0
     val TAG = "AdminMonitorListActivity"
     // 定义 Fragment 实例
-    private var currentFragment = CurrentFragment()
+    private var monitorCurrentFragment = MonitorCurrentFragment()
     private var dayFragment = MonitorDayFragment()
     private var weekFragment = MonitorWeekFragment()
     private var activeFragment: Fragment = dayFragment
@@ -72,11 +72,11 @@ class AdminMonitorListActivity : AppCompatActivity() {
         setupKingKongArea()
 
         dayFragment.updateContent(ip)
-        currentFragment.updateContent(ip)
+        monitorCurrentFragment.updateContent(ip)
         weekFragment.updateContent(ip)
 
         supportFragmentManager.beginTransaction().apply {
-            add(R.id.fragment_container, currentFragment, "3").hide(currentFragment)
+            add(R.id.fragment_container, monitorCurrentFragment, "3").hide(monitorCurrentFragment)
             add(R.id.fragment_container, weekFragment, "2").hide(weekFragment)
             add(R.id.fragment_container, dayFragment, "1")
         }.commit()
@@ -97,7 +97,7 @@ class AdminMonitorListActivity : AppCompatActivity() {
                 }
 
                 R.id.menu_info -> {
-                    switchFragment(currentFragment)
+                    switchFragment(monitorCurrentFragment)
                     true
                 }
 

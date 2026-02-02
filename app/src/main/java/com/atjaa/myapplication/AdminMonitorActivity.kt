@@ -20,16 +20,21 @@ import com.atjaa.myapplication.bean.ConstConfig
 import com.atjaa.myapplication.databinding.ActivityAdminMonitorBinding
 import com.atjaa.myapplication.utils.CommonUtils
 import com.atjaa.myapplication.utils.HttpUtils
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.Inet4Address
+import java.lang.reflect.Type
 import java.net.InetSocketAddress
-import java.net.NetworkInterface
 import java.net.Socket
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import kotlin.collections.set
+
 
 /**
  * 监控扫描页
@@ -71,10 +76,23 @@ class AdminMonitorActivity : AppCompatActivity() {
             val selectedItem = parent.getItemAtPosition(position) as Map<String, Any>
 
             val id = selectedItem["id"].toString()
-            val intent = Intent(this, AdminMonitorListActivity::class.java).apply {
-                putExtra("ip", id)
+            val uuid = selectedItem["uuid"].toString()
+            val type = selectedItem["type"].toString()
+            if ("0".equals(type)) {
+                // 展示局域网数据
+                val intent = Intent(this, AdminMonitorListActivity::class.java).apply {
+                    putExtra("ip", id)
+                }
+                startActivity(intent)
             }
-            startActivity(intent)
+            if ("1".equals(type)) {
+                // 展示云端数据
+                val intent = Intent(this, AdminMonitorUnlineListActivity::class.java).apply {
+                    putExtra("ip", id)
+                    putExtra("uuid", uuid)
+                }
+                startActivity(intent)
+            }
         }
         floatingButton.setOnClickListener {
             toggleOverlay()
@@ -115,7 +133,7 @@ class AdminMonitorActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 // 执行你的扫描逻辑
-                var localIp = getLocalIp()
+                var localIp = CommonUtils.getLocalIp()
                 if (null != localIp) {
                     var ipPrefix = localIp.substring(0, localIp.lastIndexOf('.') + 1)
                     var openIps = scanSubnet(ipPrefix, ConstConfig.PORT)
@@ -129,11 +147,13 @@ class AdminMonitorActivity : AppCompatActivity() {
                         R.layout.item_ip_list,  // 每项的布局文件
                         arrayOf<String>(
                             "ip",
-                            "name"
+                            "name",
+                            "typeDec"
                         ),  // 数据源中Map的key
                         intArrayOf(
                             R.id.txt_ip,
-                            R.id.txt_name
+                            R.id.txt_name,
+                            R.id.txt_type
                         ) // 对应布局中的控件ID
                     )
                     simpleAdapter.viewBinder =
@@ -142,6 +162,10 @@ class AdminMonitorActivity : AppCompatActivity() {
                                 val textView = view as TextView
                                 textView.text = Html.fromHtml(data, Html.FROM_HTML_MODE_LEGACY)
                                 true // 返回 true 表示我们已经手动处理了该 View，SimpleAdapter 不需要再处理
+                            } else if (view.id == R.id.txt_type && data is String) {
+                                val textView = view as TextView
+                                textView.text = Html.fromHtml(data, Html.FROM_HTML_MODE_LEGACY)
+                                true
                             } else {
                                 false // 返回 false 让 SimpleAdapter 按默认方式处理其他 View
                             }
@@ -164,58 +188,87 @@ class AdminMonitorActivity : AppCompatActivity() {
 
     /**
      * 获取主机信息
+     * 局域网和云端服务两份数据整合到一起
      */
     suspend fun getInfoList(openIps: List<String>, localIp: String): List<Map<String, Any>> {
         var dataList: MutableList<Map<String, Any>> = ArrayList<Map<String, Any>>()
+        // 1、先获取局域网数据
         if (null != openIps && openIps.size > 0) {
             Log.i(TAG, "准备获取主机信息 " + openIps.toString())
-            for (ip in openIps) {
-                var url = "http://" + ip + ":" + ConstConfig.PORT + "/"
-                var result = HttpUtils.fetchUrlContent(url)
-                if (null != result && result.startsWith("ok#")) {
-                    Log.i(TAG, "获取主机信息  " + result)
-                    var info: HashMap<String, String> = HashMap<String, String>()
+            try {
+                for (ip in openIps) {
+                    var url = "http://" + ip + ":" + ConstConfig.PORT + "/"
+                    var result = HttpUtils.fetchUrlContent(url)
+                    if (null != result && result.startsWith("ok#")) {
+                        Log.i(TAG, "获取主机信息  " + result)
+                        var info: HashMap<String, String> = HashMap<String, String>()
 
-                    // TODO 着急，逻辑可以优化
-                    if (ip.startsWith(localIp)) {
+                        // TODO 着急，逻辑可以优化
+                        if (ip.startsWith(localIp)) {
+                            info.put(
+                                "ip",
+                                "IP地址：" + ip + "(本机)" + result.substring(3).split("#").get(1)
+                            )
+                        } else {
+                            info.put(
+                                "ip",
+                                "IP地址：" + ip + result.substring(3).split("#").get(1)
+                            )
+                        }
+                        var nowTime = Calendar.getInstance().getTimeInMillis()
                         info.put(
-                            "ip",
-                            "IP地址：" + ip + "(本机)" + result.substring(3).split("#").get(1)
+                            "name",
+                            "机器名：" + result.substring(3).split("#")
+                                .get(0) + "   " + getTimeStrings(nowTime)
                         )
-                    } else {
-                        info.put(
-                            "ip",
-                            "IP地址：" + ip + result.substring(3).split("#").get(1)
-                        )
+                        info.put("id", ip)
+                        info.put("type", "0")
+                        info.put("typeDec", "数据类型：<font color='blue'>局域网实时</font>")
+                        info.put("uuid", "") // 局域网的没有uuid
+                        dataList.add(info)
                     }
-                    info.put("name", "机器名：" + result.substring(3).split("#").get(0))
-                    info.put("id", ip)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "局域网数据处理异常 " + e.message)
+            }
+        }
+        // 2、获取云端服务器数据
+        try {
+            var url =
+                "http://" + ConstConfig.remoteServerIp + ":" + ConstConfig.remoteServerPort + "/api/phone/get"
+            var resultStr = HttpUtils.fetchUrlContent(url)
+
+            if (null != resultStr && resultStr.startsWith("ok#")) {
+                var result = resultStr.substring(3)
+                val mapType: Type? =
+                    object : TypeToken<HashMap<String, HashMap<String, String>>>() {
+                    }.getType()
+                val phoneMap: MutableMap<String, HashMap<String, String>>? =
+                    Gson().fromJson(result, mapType)
+                phoneMap?.forEach { (key, innerMap) ->
+                    var info: HashMap<String, String> = HashMap<String, String>()
+                    info.put("type", "1")
+                    info.put("typeDec", "数据类型：<b>云端离线数据</b>")
+                    info.put("uuid", key) // 云端的肯定有uuid
+                    info.put(
+                        "name", "机器名：" +
+                                (innerMap.get("name") ?: "未知设备") + "   " + (innerMap.get("time")
+                            ?: "now")
+                    )
+                    info.put("id", innerMap.get("ip") ?: "0.0.0.0")
+                    info.put("ip", "IP地址：" + (innerMap.get("ip") ?: "0.0.0.0"))
                     dataList.add(info)
                 }
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "云端服务器数据处理异常 " + e.message)
         }
         return dataList
     }
 
-    /**
-     * 获取本机ip
-     */
-    fun getLocalIp(): String? {
-        try {
-            val interfaces = NetworkInterface.getNetworkInterfaces()
-            for (intf in interfaces) {
-                val addrs = intf.inetAddresses
-                for (addr in addrs) {
-                    if (!addr.isLoopbackAddress && addr is Inet4Address) {
-                        val host = addr.hostAddress // 例如 192.168.1.50
-                        return host
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            println("获取本机IP异常" + e)
-        }
-        return null
+    private fun getTimeStrings(t: Long): String {
+        val simpleDateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+        return simpleDateFormat.format(t)
     }
 
     suspend fun scanSubnet(prefix: String, port: Int): List<String> = withContext(Dispatchers.IO) {

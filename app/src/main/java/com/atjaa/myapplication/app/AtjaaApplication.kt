@@ -7,5 +7,6 @@ class AtjaaApplication: Application() {
     override fun onCreate() {
         super.onCreate()
         CommonUtils.scheduleServiceCheck(this)
+        CommonUtils.scheduleReportWork(this)
     }
 }

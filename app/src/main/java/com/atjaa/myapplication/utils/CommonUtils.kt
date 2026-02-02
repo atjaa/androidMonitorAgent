@@ -2,6 +2,7 @@ package com.atjaa.myapplication.utils
 
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -11,6 +12,8 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.media.RingtoneManager
 import android.os.Build
+import android.os.PowerManager
+import android.provider.Settings
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -23,13 +26,17 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.atjaa.myapplication.NotificationMessageActivity
 import com.atjaa.myapplication.R
+import com.atjaa.myapplication.worker.ReportWorker
 import com.atjaa.myapplication.worker.ServiceCheckWorker
 import io.ktor.http.content.MultiPartData
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
 import io.ktor.utils.io.jvm.javaio.copyTo
 import java.io.File
+import java.net.Inet4Address
+import java.net.NetworkInterface
 import java.util.concurrent.TimeUnit
+import kotlin.collections.iterator
 
 /**
  * 通用工具类
@@ -55,6 +62,25 @@ class CommonUtils {
             val workManager = WorkManager.getInstance(context)
             workManager.enqueueUniquePeriodicWork(
                 "AtjaaServiceKeepAlive",
+                ExistingPeriodicWorkPolicy.KEEP, // 如果任务已存在则保留，不重复创建
+                checkRequest
+            )
+        }
+
+        fun scheduleReportWork(context: Context) {
+            Log.i("Atjaa", "启动信息上报任务，20分钟触发一次")
+            val checkRequest = PeriodicWorkRequestBuilder<ReportWorker>(
+                20, TimeUnit.MINUTES // 系统允许的最小间隔是 15 分钟
+            )
+                .setConstraints(
+                    Constraints.Builder()
+                        .setRequiredNetworkType(NetworkType.CONNECTED) // 仅在有网时检查，更省电
+                        .build()
+                )
+                .build()
+            val workManager = WorkManager.getInstance(context)
+            workManager.enqueueUniquePeriodicWork(
+                "AtjaaReportInfo",
                 ExistingPeriodicWorkPolicy.KEEP, // 如果任务已存在则保留，不重复创建
                 checkRequest
             )
@@ -167,12 +193,76 @@ class CommonUtils {
                         file = File(context.cacheDir, fileName)
                         input.copyTo(file.outputStream())
                     }
+
                     else -> part.dispose()
                 }
             }
             return file
         }
 
+        @SuppressLint("HardwareIds")
+        fun getPhoneUuid(context: Context): String {
+            val androidId = Settings.Secure.getString(
+                context.contentResolver,
+                Settings.Secure.ANDROID_ID
+            )
+            return androidId
+        }
+
+        /**
+         * 获取本机IP
+         */
+        fun getLocalIp(): String? {
+            try {
+                val interfaces = NetworkInterface.getNetworkInterfaces()
+                for (intf in interfaces) {
+                    val addrs = intf.inetAddresses
+                    for (addr in addrs) {
+                        if (!addr.isLoopbackAddress && addr is Inet4Address) {
+                            val host = addr.hostAddress // 例如 192.168.1.50
+                            return host
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                println("获取本机IP异常" + e)
+            }
+            return null
+        }
+
+        /**
+         * 获取设备名称
+         */
+        fun getCustomDeviceName(context: Context): String {
+            val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+            val isScreenOn = pm.isInteractive // 屏幕是否亮着
+            var screenStr: String
+            if (isScreenOn) {
+                screenStr = "#<font color='red'>(亮屏)</font>"
+            } else {
+                screenStr = "#(熄屏)"
+            }
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                (Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME)
+                    ?: "Unknown Device") + screenStr
+            } else {
+                // 旧版本通过蓝牙或特定字段获取
+                (Settings.Secure.getString(context.contentResolver, "bluetooth_name")
+                    ?: "Unknown Device") + screenStr
+            }
+        }
+
+        fun getCustomDeviceNameSimple(context: Context): String {
+            val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                (Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME)
+                    ?: "Unknown Device")
+            } else {
+                // 旧版本通过蓝牙或特定字段获取
+                (Settings.Secure.getString(context.contentResolver, "bluetooth_name")
+                    ?: "Unknown Device")
+            }
+        }
 
     }
 

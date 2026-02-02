@@ -54,6 +54,9 @@
         android:theme="@style/Theme.AndroidMonitorAgent"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".AdminMonitorUnlineListActivity"
+            android:exported="false" />
+        <activity
             android:name=".NotificationMessageActivity"
             android:exported="false" />
         <activity
@@ -87,6 +90,7 @@
             android:exported="false"
             android:foregroundServiceType="remoteMessaging"
             tools:ignore="ForegroundServicePermission" />
+
         <receiver
             android:name=".receiver.BootReceiver"
             android:enabled="true"

@@ -113,8 +113,10 @@ class MonitorService : Service() {
         Log.i(TAG,"【onCreate】创建手机消息通道")
         CommonUtils.createNotificationChannel(this)
 
-        Log.i(TAG,"【onCreate】启动Worker能力保活本服务 15分钟保活一次")
+        Log.i(TAG,"【onCreate】启动Worker能力保活服务 15分钟保活一次")
         CommonUtils.scheduleServiceCheck(this)
+        Log.i(TAG,"【onCreate】启动Worker信息上报服务 20分钟保活一次")
+        CommonUtils.scheduleReportWork(this)
 
         Log.i(TAG,"【onCreate】动态注册软件安装广播接收器")
         val filter = IntentFilter(Intent.ACTION_PACKAGE_ADDED).apply {
@@ -200,7 +202,7 @@ class MonitorService : Service() {
                     server = embeddedServer(CIO, port = port, host = "0.0.0.0") {
                         routing {
                             get("/") {
-                                call.respondText("ok#" + getCustomDeviceName(applicationContext))
+                                call.respondText("ok#" + CommonUtils.getCustomDeviceName(applicationContext))
                             }
                             get("/monitor/day") {
                                 call.respondText("ok#" + getMonitorInfo(0))
@@ -320,31 +322,6 @@ class MonitorService : Service() {
         result.put("txtAllNumbers", "开机操作总次数:" + systemInfor.allUsedNumber)
         result.put("datalist", datalist)
         return Gson().toJson(result)
-    }
-
-    /**
-     * 获取设备名称
-     */
-    fun getCustomDeviceName(context: Context): String {
-        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-        val isScreenOn = pm.isInteractive // 屏幕是否亮着
-        var screenStr: String
-        if (isScreenOn) {
-            screenStr = "#<font color='red'>(亮屏)</font>"
-        } else {
-            screenStr = "#(熄屏)"
-        }
-        if (!isScreenOn) {
-
-        }
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            (Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME)
-                ?: "Unknown Device") + screenStr
-        } else {
-            // 旧版本通过蓝牙或特定字段获取
-            (Settings.Secure.getString(context.contentResolver, "bluetooth_name")
-                ?: "Unknown Device") + screenStr
-        }
     }
 
 

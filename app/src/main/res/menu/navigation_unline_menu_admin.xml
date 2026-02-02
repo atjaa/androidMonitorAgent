@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_count"
+        android:icon="@drawable/numbered_list"
+        android:title="历史" />
+    <item android:id="@+id/menu_download"
+        android:icon="@drawable/server_stack"
+        android:title="下载" />
+</menu>

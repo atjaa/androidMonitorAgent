@@ -5,12 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.material.imageview.ShapeableImageView
+    <ImageView
         android:id="@+id/img_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/user"
-        app:shapeAppearanceOverlay="@style/circleImage"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -24,29 +22,29 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/txt_ip"
+            android:id="@+id/txt_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:textSize="10sp"
-            tools:text="设备IP" />
+            android:textStyle="bold"
+            tools:text="应用名称" />
 
         <TextView
-            android:id="@+id/txt_name"
+            android:id="@+id/txt_package"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
+            android:layout_margin="5dp"
             android:textSize="10sp"
-            tools:text="设备名称" />
+            tools:text="包名称" />
+
         <TextView
-            android:id="@+id/txt_type"
+            android:id="@+id/txt_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
+            android:layout_margin="5dp"
             android:textSize="10sp"
-            tools:text="数据类型" />
-
-
+            tools:text="安装时间" />
 
     </LinearLayout>
 

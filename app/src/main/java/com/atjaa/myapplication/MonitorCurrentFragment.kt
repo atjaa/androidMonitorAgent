@@ -101,21 +101,24 @@ class MonitorCurrentFragment : Fragment() {
                 // 处理安装记录
                 var datalist: MutableList<Map<String, Any>>? = data.get("appAddInfo")
                 if (null != datalist) {
+                    val reversedList = datalist.asReversed()
                     val
                     // 创建SimpleAdapter
                             simpleAdapter = SimpleAdapter(
                         context,  // 上下文
-                        datalist,  // 数据源
-                        R.layout.item_ip_list,  // 暂时使用这个模板
+                        reversedList,  // 数据源
+                        R.layout.item_add_list,  // 每项的布局文件
                         arrayOf<String>(
                             "appName",
                             "packageName",
-                            "icon"
+                            "icon", //  和上报用的不是一个变量
+                            "time"
                         ),  // 数据源中Map的key
                         intArrayOf(
-                            R.id.txt_ip,
                             R.id.txt_name,
-                            R.id.img_icon
+                            R.id.txt_package,
+                            R.id.img_icon,
+                            R.id.txt_time
                         ) // 对应布局中的控件ID
                     )
                     // 2. 设置 ViewBinder 来特殊处理 icon 字段

@@ -20,8 +20,11 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.atjaa.myapplication.databinding.ActivitySplashBinding
 import com.atjaa.myapplication.utils.PermissionUtils
+import com.atjaa.myapplication.worker.ReportWorker
 import es.dmoral.toasty.Toasty
 
 /**
@@ -84,6 +87,13 @@ class SplashActivity : AppCompatActivity() {
             startActivity(intent)
 
         }
+
+        // 主动测试一个worker
+//        val testWorkRequest = OneTimeWorkRequestBuilder<ReportWorker>()
+//            .addTag("TEST_TAG")
+//            .build()
+//        WorkManager.getInstance(applicationContext).enqueue(testWorkRequest)
+
         // 倒计时进入登录页
         val intent = Intent(this, LoginActivity::class.java)
         val countDownTimer = object : CountDownTimer(sleepTime, 1000) {

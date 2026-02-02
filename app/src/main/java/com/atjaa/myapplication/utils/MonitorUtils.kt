@@ -57,8 +57,8 @@ class MonitorUtils {
         fun getData(
             showInfoBean: AppInforBean,
             outType: Int
-        ): Map<String, Any> {
-            val map: MutableMap<String, Any> = HashMap<String, Any>()
+        ): HashMap<String, Any> {
+            val map: HashMap<String, Any> = HashMap<String, Any>()
             if (outType == 0) {
                 map.put("icon", showInfoBean.icon)
             } else {

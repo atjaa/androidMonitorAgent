@@ -2,40 +2,55 @@
 
 ### 监控手机App使用情况
 
-- 主页面
+#### 页面
 
 > SplashActivity.kt 3秒倒计时，之后进入登录页面
 
-- 登录页面
-
-> LoginActivity.kt
+> LoginActivity.kt 登录页面，可以跳转不同后台  
 
 1) 输入1234 进入App监控列表页面 MonitorActivity.kt  
    分 天、星期、月份查看App使用情况
 2) 输入7758521 进入App监控管理页面 AdminMonitorActivity.kt  
    这是一个可以局域网查看其他手机（安装了本app）的功能，一样可以分 天、星期、月份查看远程手机App使用情况
 
-- 服务
+#### 服务
 
-> MonitorService.kt
-
+> MonitorService.kt 核心服务，提供监控大部分能力
 1) 启动http访问服务，默认监听本机（0.0.0.0）33789端口
 2) 提供天、星期、月份查看本机App使用情况的接口
 3) 通过BootReceiver.kt监控开机广播启动本服务
 4) 通过ServiceCheckWorker.kt进行保活
-5) 通过PhotoService.kt提供前置摄像头拍照
+5) 通过PhotoService.kt提供前置摄像头拍照  
 
-- 保活优化  
+> PhotoService  拍照服务
+  调用前置摄像头进行拍照，并发送给远程调用方
+
+#### 广播接受器  
+
+> BootReceiver 监听加电和自己应用更新广播  
+> InstallReceiver 监听手机应用安装广播  
+
+#### Worker组件  
+
+> ReportWorker 信息上报  
+> ServiceCheckWorker 保活  
+
+#### 保活优化  
   增加小米手机支持的无障碍保活机制  
   AtjaaKeepAliveService.kt
 
-- 局域网自动升级  
+#### 局域网自动升级  
   AppUpdateActivity 实现局域网内指定ip和端口的自动升级，省去每次更新都USB安装的问题
+#### 广域网信息上报  
+提供跨网监控手段
+> 被监控方每20分钟上报当前正在打开的应用信息  
+> 被监控方安装新APP时自动上报安装的软件信息  
+> 监控方分两个页面展示以上信息
 
-- 授权状态检查  
+#### 授权状态检查  
   PermissionCheckActivity 对本应用所需的权限进行整理报告
 
-- 安卓权限
+#### 安卓权限
 ```xml
 
 <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
@@ -52,21 +67,20 @@ android:name="android.permission.INTERNET" /> <!-- 网络权限 -->
 android:name="android.permission.WAKE_LOCK" /><!-- 确保 Socket 长连接在 CPU 进入休眠时不中断，申请和使用 WAKE_LOCK -->
 <uses-feature android:name="android.hardware.camera.any" /> <!-- 摄像头权限 -->
 <uses-permission android:name="android.permission.CAMERA" /> <!-- 摄像头权限 -->
+<!-- 剩下略   -->
 ```
 
-### 后续内容
+#### 后续内容
 
-* 保活还不够  
-  熄屏时无法提供http服务（相当于失联）  
+* 保活还不够
   无障碍保活需要亮屏，熄屏ServiceCheckWorker.ket ？
 * 授权优化  
   拍照和电源白名单实现自动授权（遮罩层不生效？）  
   自启动和查看其他App信息暂时无法自动，优化了引导  
   无障碍只能手动
 * 静默截屏涉及安全暂时无法实现
-* 前置摄像头抓取优化
-* 做一个快速连接到系统敏感设置的页面
-* 其他能力还未想到
+* 个别手机重启无法提供监控服务要等15分钟后，需要排查
+* README文档整理
 
 本APP仅无聊学习安卓开发练手，请勿他用，如有任何责任均与本人无关
 代码参考列表

@@ -28,6 +28,8 @@ import com.atjaa.myapplication.NotificationMessageActivity
 import com.atjaa.myapplication.R
 import com.atjaa.myapplication.worker.ReportWorker
 import com.atjaa.myapplication.worker.ServiceCheckWorker
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import io.ktor.http.content.MultiPartData
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
@@ -35,6 +37,7 @@ import io.ktor.utils.io.jvm.javaio.copyTo
 import java.io.File
 import java.net.Inet4Address
 import java.net.NetworkInterface
+import java.util.LinkedList
 import java.util.concurrent.TimeUnit
 import kotlin.collections.iterator
 
@@ -44,6 +47,23 @@ import kotlin.collections.iterator
 class CommonUtils {
     companion object {
         val TAG = "CommonUtils"
+
+
+        /**
+         * 删除安装记录指定某一条
+         */
+        fun delAddDetail(packageName: String?, context: Context) {
+            SpCacheUtils.init(context)
+            var appAddInfo = SpCacheUtils.get("appAddInfo")
+            if (!"".equals(appAddInfo)) {
+                val type = object : TypeToken<LinkedList<MutableMap<String, Any>>>() {}.type
+                val data: LinkedList<MutableMap<String, Any>> = Gson().fromJson(appAddInfo, type)
+                data.removeIf { map ->
+                    map["packageName"] == packageName
+                }
+                SpCacheUtils.put("appAddInfo", Gson().toJson(data))
+            }
+        }
 
         /**
          * 保活检查

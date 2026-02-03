@@ -100,25 +100,25 @@ class MonitorService : Service() {
                 "Phone Assistant:wifiLock"
             )
 
-        Log.i(TAG,"【onCreate】立即创建通知并启动前台服务 (适配 Android 8.0+)")
+        Log.i(TAG, "【onCreate】立即创建通知并启动前台服务 (适配 Android 8.0+)")
         startForeground(1, createNotification())
 
-        Log.i(TAG,"【onCreate】开启HTTP线程监听端口")
+        Log.i(TAG, "【onCreate】开启HTTP线程监听端口")
         startTcpServer(ConstConfig.PORT)
 
-        Log.i(TAG,"【onCreate】绑定目标 拍照服务")
+        Log.i(TAG, "【onCreate】绑定目标 拍照服务")
         val intent = Intent(this, PhotoService::class.java)
         bindService(intent, connection, Context.BIND_AUTO_CREATE)
 
-        Log.i(TAG,"【onCreate】创建手机消息通道")
+        Log.i(TAG, "【onCreate】创建手机消息通道")
         CommonUtils.createNotificationChannel(this)
 
-        Log.i(TAG,"【onCreate】启动Worker能力保活服务 15分钟保活一次")
+        Log.i(TAG, "【onCreate】启动Worker能力保活服务 15分钟保活一次")
         CommonUtils.scheduleServiceCheck(this)
-        Log.i(TAG,"【onCreate】启动Worker信息上报服务 20分钟保活一次")
+        Log.i(TAG, "【onCreate】启动Worker信息上报服务 20分钟保活一次")
         CommonUtils.scheduleReportWork(this)
 
-        Log.i(TAG,"【onCreate】动态注册软件安装广播接收器")
+        Log.i(TAG, "【onCreate】动态注册软件安装广播接收器")
         val filter = IntentFilter(Intent.ACTION_PACKAGE_ADDED).apply {
             addDataScheme("package")
         }
@@ -133,7 +133,7 @@ class MonitorService : Service() {
         // 重启判断
         if (intent == null) {
             // 在这里重新启动你的 Socket 监听或消息接收逻辑
-            Log.i(TAG,"【onStartCommand】启动HTTP线程监听端口")
+            Log.i(TAG, "【onStartCommand】启动HTTP线程监听端口")
             startTcpServer(ConstConfig.PORT)
         }
         try {
@@ -202,7 +202,11 @@ class MonitorService : Service() {
                     server = embeddedServer(CIO, port = port, host = "0.0.0.0") {
                         routing {
                             get("/") {
-                                call.respondText("ok#" + CommonUtils.getCustomDeviceName(applicationContext))
+                                call.respondText(
+                                    "ok#" + CommonUtils.getCustomDeviceName(
+                                        applicationContext
+                                    )
+                                )
                             }
                             get("/monitor/day") {
                                 call.respondText("ok#" + getMonitorInfo(0))
@@ -221,6 +225,17 @@ class MonitorService : Service() {
                             get("/monitor/photo") {
                                 call.respondText("ok#" + targetService?.takePhoto())
                             }
+
+                            get("/monitor/add/del") {
+                                val pg = call.request.queryParameters["pg"]
+                                call.respondText(
+                                    "ok#" + CommonUtils.delAddDetail(
+                                        pg,
+                                        this@MonitorService
+                                    )
+                                )
+                            }
+
                             get("/monitor/message") {
                                 val message = call.request.queryParameters["m"]
                                 if (null != message) {

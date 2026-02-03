@@ -19,9 +19,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.LinkedList
 
 class InstallReceiver : BroadcastReceiver() {
-
+    val APP_ADD_MAX_SIZE = 100;
     val TAG = "InstallReceiver"
     override fun onReceive(context: Context, intent: Intent) {
         if (intent?.action == Intent.ACTION_PACKAGE_ADDED) {
@@ -82,12 +83,15 @@ class InstallReceiver : BroadcastReceiver() {
         SpCacheUtils.init(context)
         var appAddInfo = SpCacheUtils.get("appAddInfo")
         if ("".equals(appAddInfo)) {
-            val dataList: MutableList<Map<String, Any>> = ArrayList<Map<String, Any>>()
+            val dataList: MutableList<Map<String, Any>> = LinkedList<Map<String, Any>>()
             dataList.add(map)
             SpCacheUtils.put("appAddInfo", Gson().toJson(dataList))
         } else {
-            val type = object : TypeToken<MutableList<MutableMap<String, Any>>>() {}.type
-            val data: MutableList<MutableMap<String, Any>> = Gson().fromJson(appAddInfo, type)
+            val type = object : TypeToken<LinkedList<MutableMap<String, Any>>>() {}.type
+            val data: LinkedList<MutableMap<String, Any>> = Gson().fromJson(appAddInfo, type)
+            if (data.size >= APP_ADD_MAX_SIZE) {
+                data.removeAt(0); // 移除索引为 0 的（最旧）
+            }
             data.add(map)
             SpCacheUtils.put("appAddInfo", Gson().toJson(data))
         }

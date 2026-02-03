@@ -33,7 +33,6 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import kotlin.collections.set
 
 
 /**
@@ -111,7 +110,8 @@ class AdminMonitorActivity : AppCompatActivity() {
             startActivity(intent)
         }
         toAbout.setOnClickListener {
-            Toasty.info(this, "当前系统版本:" + CommonUtils.getAppVersion(this).second).show()
+            val intent = Intent(this, AboutActivity::class.java)
+            startActivity(intent)
         }
     }
 

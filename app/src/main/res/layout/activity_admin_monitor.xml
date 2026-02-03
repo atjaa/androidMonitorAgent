@@ -141,8 +141,8 @@
             android:background="#EEEEEE" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/to_about"
-            android:text="应用版本"
-            app:icon="@android:drawable/ic_dialog_alert"
+            android:text="应用信息"
+            app:icon="@drawable/ellipsis_horizontal_circle"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

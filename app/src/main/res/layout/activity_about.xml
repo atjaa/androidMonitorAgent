@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".AboutActivity">
+    <LinearLayout
+        android:id="@+id/lin1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:onClick="back"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="&lt;返回" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/lin2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="start|center">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="应用信息"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="5dp"
+            />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#CCCCCC" />
+        <TextView
+            android:id="@+id/m1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="局域网服务：192.168.3.13"
+            android:textSize="18sp" />
+        <TextView
+            android:id="@+id/m2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="局域网端口：8080"
+            android:textSize="18sp" />
+        <TextView
+            android:id="@+id/m3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="广域网服务：115.191.56.243"
+            android:textSize="18sp" />
+        <TextView
+            android:id="@+id/m4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="广域网端口：8080"
+            android:textSize="18sp" />
+        <TextView
+            android:id="@+id/m5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="自动升级路径：/api/download/"
+            android:textSize="18sp" />
+        <TextView
+            android:id="@+id/m6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="自动升级文件：app-debug.apk"
+            android:textSize="18sp" />
+        <TextView
+            android:id="@+id/m_v"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="应用版本号：1.0.0"
+            android:textSize="18sp" />
+        <TextView
+            android:id="@+id/m10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="配置信息已写死，暂时无法修改"
+            android:textStyle="bold"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+</LinearLayout>

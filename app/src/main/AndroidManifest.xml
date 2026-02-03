@@ -54,6 +54,9 @@
         android:theme="@style/Theme.AndroidMonitorAgent"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".AboutActivity"
+            android:exported="false" />
+        <activity
             android:name=".AdminMonitorUnlineListActivity"
             android:exported="false" />
         <activity

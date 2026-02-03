@@ -108,23 +108,31 @@ class MonitorService : Service() {
         startTcpServer(ConstConfig.PORT)
 
         Log.i(TAG, "【onCreate】绑定目标 拍照服务")
-        val intent = Intent(this, PhotoService::class.java)
-        bindService(intent, connection, Context.BIND_AUTO_CREATE)
-
-        Log.i(TAG, "【onCreate】创建手机消息通道")
-        CommonUtils.createNotificationChannel(this)
-
-        Log.i(TAG, "【onCreate】启动Worker能力保活服务 15分钟保活一次")
-        CommonUtils.scheduleServiceCheck(this)
-        Log.i(TAG, "【onCreate】启动Worker信息上报服务 20分钟保活一次")
-        CommonUtils.scheduleReportWork(this)
-
-        Log.i(TAG, "【onCreate】动态注册软件安装广播接收器")
-        val filter = IntentFilter(Intent.ACTION_PACKAGE_ADDED).apply {
-            addDataScheme("package")
+        try {
+            val intent = Intent(this, PhotoService::class.java)
+            bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        } catch (e: Exception) {
+            Log.e(TAG, "拍照服务绑定异常" + e.message)
         }
-        // installReceiver 是类成员变量，确保全局唯一
-        registerReceiver(installReceiver, filter)
+
+        try {
+            Log.i(TAG, "【onCreate】创建手机消息通道")
+            CommonUtils.createNotificationChannel(this)
+
+            Log.i(TAG, "【onCreate】启动Worker能力保活服务 15分钟保活一次")
+            CommonUtils.scheduleServiceCheck(this)
+            Log.i(TAG, "【onCreate】启动Worker信息上报服务 20分钟保活一次")
+            CommonUtils.scheduleReportWork(this)
+
+            Log.i(TAG, "【onCreate】动态注册软件安装广播接收器")
+            val filter = IntentFilter(Intent.ACTION_PACKAGE_ADDED).apply {
+                addDataScheme("package")
+            }
+            // installReceiver注册（监听APP安装）
+            registerReceiver(installReceiver, filter)
+        } catch (e: Exception) {
+            Log.e(TAG, "MonitorService创建异常" + e.message)
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -225,7 +233,7 @@ class MonitorService : Service() {
                             }
 
                             get("/monitor/permission") {
-                                call.respondText("ok#" +  PermissionUtils.getPermissionInfoJson(this@MonitorService))
+                                call.respondText("ok#" + PermissionUtils.getPermissionInfoJson(this@MonitorService))
                             }
 
                             get("/monitor/photo") {

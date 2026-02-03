@@ -17,6 +17,8 @@ class AdminMonitorUnlineListActivity : AppCompatActivity() {
 
     private var monitorUnlineAppFragment = MonitorUnlineAppFragment()
     private var monitorUnlineAddFragment = MonitorUnlineAddFragment()
+
+    private var monitorUnlinePermissionFragment = MonitorUnlinePermissionFragment()
     private var activeFragment: Fragment = monitorUnlineAppFragment
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,8 +36,10 @@ class AdminMonitorUnlineListActivity : AppCompatActivity() {
 
         monitorUnlineAppFragment.updateContent(uuid)
         monitorUnlineAddFragment.updateContent(uuid)
+        monitorUnlinePermissionFragment.updateContent(uuid)
 
         supportFragmentManager.beginTransaction().apply {
+            add(R.id.fragment_container, monitorUnlinePermissionFragment, "3").hide(monitorUnlinePermissionFragment)
             add(R.id.fragment_container, monitorUnlineAddFragment, "2").hide(monitorUnlineAddFragment)
             add(R.id.fragment_container, monitorUnlineAppFragment, "1")
         }.commit()
@@ -50,6 +54,11 @@ class AdminMonitorUnlineListActivity : AppCompatActivity() {
 
                 R.id.menu_download -> {
                     switchFragment(monitorUnlineAddFragment)
+                    true
+                }
+
+                R.id.menu_permission -> {
+                    switchFragment(monitorUnlinePermissionFragment)
                     true
                 }
 

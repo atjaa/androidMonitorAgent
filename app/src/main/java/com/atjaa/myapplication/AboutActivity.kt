@@ -8,6 +8,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.atjaa.myapplication.databinding.ActivityAboutBinding
 import com.atjaa.myapplication.utils.CommonUtils
+import com.atjaa.myapplication.utils.PermissionUtils
 import es.dmoral.toasty.Toasty
 
 class AboutActivity : AppCompatActivity() {
@@ -24,6 +25,12 @@ class AboutActivity : AppCompatActivity() {
         }
         var version = CommonUtils.getAppVersion(this).second
         binding.mV.text = "应用版本：" + version
+        var isXiaoMi = PermissionUtils.isMiui()
+        var phoneType = "手机品牌：小米"
+        if (!isXiaoMi) {
+            phoneType = "手机品牌：其他"
+        }
+        binding.mPhoneType.text = phoneType
     }
 
     fun back(view: View) {

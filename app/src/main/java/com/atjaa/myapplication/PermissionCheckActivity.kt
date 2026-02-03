@@ -60,9 +60,25 @@ class PermissionCheckActivity : AppCompatActivity() {
                 delay(500)
 
                 // --- 2. 检查开机自启动 ---
-                val item2 = hashMapOf("tvCheck" to "检查开机自启动授权", "tvCheckResult" to "无法检查")
-                safeAddAndNotify(item2)
+                if(PermissionUtils.isMiui()) {
+                    val item2 = hashMapOf(
+                        "tvCheck" to "检查开机自启动(小米)授权",
+                        "tvCheckResult" to "无法检查"
+                    )
+                    safeAddAndNotify(item2)
+                    delay(500)
+                    val isAutoStart =
+                        PermissionUtils.isAutoStartEnabledXiaoMi(this@PermissionCheckActivity)
+                    safeUpdateAndNotify(item2, if (isAutoStart) "通过" else "未开启")
+                    delay(500)
+                }
 
+                // --- 2. 检查开机自启动 ---
+                val item21 = hashMapOf("tvCheck" to "检查开机自启动(RootReceiver)授权", "tvCheckResult" to "无法检查")
+                safeAddAndNotify(item21)
+                delay(500)
+                val isAutoStartComm = PermissionUtils.isBootReceiverEnabled(this@PermissionCheckActivity)
+                safeUpdateAndNotify(item21, if (isAutoStartComm) "通过" else "未开启")
                 delay(500)
 
                 // --- 3. 检查使用情况 ---

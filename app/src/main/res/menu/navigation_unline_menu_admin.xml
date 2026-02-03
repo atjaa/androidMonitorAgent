@@ -6,4 +6,7 @@
     <item android:id="@+id/menu_download"
         android:icon="@drawable/server_stack"
         android:title="下载" />
+    <item android:id="@+id/menu_permission"
+        android:icon="@drawable/key"
+        android:title="授权" />
 </menu>

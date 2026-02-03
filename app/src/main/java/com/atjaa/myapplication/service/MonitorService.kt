@@ -28,6 +28,7 @@ import com.atjaa.myapplication.bean.ConstConfig
 import com.atjaa.myapplication.receiver.InstallReceiver
 import com.atjaa.myapplication.utils.CommonUtils
 import com.atjaa.myapplication.utils.MonitorUtils
+import com.atjaa.myapplication.utils.PermissionUtils
 import com.atjaa.myapplication.utils.SpCacheUtils
 import com.atjaa.myapplication.utils.SystemInforUtils
 import com.google.gson.Gson
@@ -214,12 +215,17 @@ class MonitorService : Service() {
                             get("/monitor/week") {
                                 call.respondText("ok#" + getMonitorInfo(1))
                             }
+
                             get("/monitor/month") {
                                 call.respondText("ok#" + getMonitorInfo(2))
                             }
 
                             get("/monitor/current") {
                                 call.respondText("ok#" + getPhoneInfo())
+                            }
+
+                            get("/monitor/permission") {
+                                call.respondText("ok#" +  PermissionUtils.getPermissionInfoJson(this@MonitorService))
                             }
 
                             get("/monitor/photo") {

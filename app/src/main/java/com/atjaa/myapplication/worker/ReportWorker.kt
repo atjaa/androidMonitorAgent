@@ -10,6 +10,7 @@ import com.atjaa.myapplication.bean.ConstConfig
 import com.atjaa.myapplication.utils.CommonUtils
 import com.atjaa.myapplication.utils.HttpUtils
 import com.atjaa.myapplication.utils.MonitorUtils
+import com.atjaa.myapplication.utils.PermissionUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -42,12 +43,20 @@ class ReportWorker(context: Context, workerParams: WorkerParameters) :
              *          lastTime    最近打开时间 改为 上报时间
              *          }
              *  }
+             *  permissions [{  授权情况
+             *              tvCheck         授权信息
+             *              tvCheckResult   授权结果
+             *              }
+             *  ]
              */
             val map: MutableMap<String, Any> = HashMap<String, Any>()
             val foregroundData = getForegroundApp()
             if (null != foregroundData) {
                 map["appInfo"] = foregroundData
             }
+            var permissions = PermissionUtils.getPermissionInfo(applicationContext)
+            map["permissions"] = permissions
+
             map["uuid"] = CommonUtils.getPhoneUuid(applicationContext)
             map["name"] = CommonUtils.getCustomDeviceNameSimple(applicationContext)
             var localIp = CommonUtils.getLocalIp()

@@ -7,16 +7,13 @@ import android.os.Build
 import android.util.Log
 import com.atjaa.myapplication.service.MonitorService
 
+class PgReplacedReceiver : BroadcastReceiver() {
 
-/**
- * 广播监听服务
- */
-class BootReceiver : BroadcastReceiver() {
-    val TAG = "BootReceiver"
+    val TAG = "PgReplacedReceiver"
     override fun onReceive(context: Context, intent: Intent) {
-        // 广播：手机开机
-        if (Intent.ACTION_BOOT_COMPLETED == intent.getAction()) {
-            Log.i(TAG, "收到手机开机广播")
+        // 应用自更新
+        if (Intent.ACTION_MY_PACKAGE_REPLACED == intent.getAction()) {
+            Log.i(TAG,"收到应用自更新的广播")
             val serviceIntent: Intent = Intent(context, MonitorService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(serviceIntent) // Android 8.0+ 需启动前台服务

@@ -33,8 +33,16 @@
 > ServiceCheckWorker 保活  
 
 #### 保活优化  
-  增加小米手机支持的无障碍保活机制  
-  AtjaaKeepAliveService.kt
+1、 无障碍保活  AtjaaKeepAliveService  
+2、 worker定时保活  ServiceCheckWorker  
+以上两个都受自启动限制  
+3、 账号同步保活  
+> res/xml/authenticator.xml 声明账号类型  
+> res/xml/sync_adapter.xml (声明同步逻辑)  
+> class AuthenticatorService : Service  认证服务：让系统识别你的账号
+> class SyncService : Service   同步服务：这是系统“复活”你的入口
+> class StubProvider : ContentProvider  占位 Provider
+> AndroidManifest.xml 中注册  
 
 #### 局域网自动升级  
   AppUpdateActivity 实现局域网内指定ip和端口的自动升级，省去每次更新都USB安装的问题

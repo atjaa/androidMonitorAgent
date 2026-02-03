@@ -53,8 +53,9 @@ class MonitorUnlineAddFragment : Fragment() {
             if (null != result && result.startsWith("ok#")) {
                 var dataStr = result.substring(3)
                 val listType = object : TypeToken<LinkedList<HashMap<String,String>>>() {}.getType()
-                val appAddList: LinkedList<HashMap<String,String>> = Gson().fromJson(dataStr, listType)
-                val reversedList = appAddList.asReversed()
+                val appAddList: LinkedList<HashMap<String,String>?> = Gson().fromJson(dataStr, listType)
+                val safeAddList = appAddList.filterNotNull()
+                val reversedList = safeAddList.asReversed()
                 val
                 // 创建SimpleAdapter
                         simpleAdapter = SimpleAdapter(

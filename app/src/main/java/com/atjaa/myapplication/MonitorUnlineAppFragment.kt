@@ -59,13 +59,14 @@ class MonitorUnlineAppFragment : Fragment() {
             if (null != result && result.startsWith("ok#")) {
                 var dataStr = result.substring(3)
                 val listType: Type? = object : TypeToken<LinkedList<HashMap<String,String>>>() {}.getType()
-                val appList: LinkedList<HashMap<String,String>> = Gson().fromJson(dataStr, listType)
-
+                val appList: LinkedList<HashMap<String,String>?> = Gson().fromJson(dataStr, listType)
+                val safeAppList = appList.filterNotNull()
+                val reversedList = safeAppList.asReversed()
                 val
                 // 创建SimpleAdapter
                         simpleAdapter = SimpleAdapter(
                     context,  // 上下文
-                    appList,  // 数据源
+                    reversedList,  // 数据源
                     R.layout.item_info_list,  // 每项的布局文件
                     arrayOf<String>(
                         "name",

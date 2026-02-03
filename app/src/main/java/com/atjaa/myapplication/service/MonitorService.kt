@@ -141,8 +141,8 @@ class MonitorService : Service() {
 //            暂时注释，原因是小米手机
 //            (packageName=com.atjaa.myapplication, userId=0)'s appop state for runtime op android:nearby_wifi_devices should not be set directly.
 //            可能有关
-//            wakeLock?.acquire(60 * 60 * 1000L)
-//            wifiLock?.acquire()
+            wakeLock?.acquire(60 * 60 * 1000L)
+            wifiLock?.acquire()
         } catch (e: Exception) {
             Log.e(TAG, "Lock启动异常" + e.message)
         }
@@ -158,12 +158,12 @@ class MonitorService : Service() {
             Log.e(TAG, "注销异常: ${e.message}")
         }
 
-//        if (wakeLock?.isHeld == true) {
-//            wakeLock?.release()
-//        }
-//        if (wifiLock?.isHeld == true) {
-//            wifiLock?.release()
-//        }
+        if (wakeLock?.isHeld == true) {
+            wakeLock?.release()
+        }
+        if (wifiLock?.isHeld == true) {
+            wifiLock?.release()
+        }
         server?.stop(1000, 2000)
         serviceScope.cancel()
         super.onDestroy()

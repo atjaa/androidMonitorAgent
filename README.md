@@ -2,16 +2,12 @@
 
 ### 监控手机App使用情况
 
-#### 页面
+#### 核心页面
 
-> SplashActivity.kt 3秒倒计时，之后进入登录页面
-
-> LoginActivity.kt 登录页面，可以跳转不同后台  
-
-1) 输入1234 进入App监控列表页面 MonitorActivity.kt  
-   分 天、星期、月份查看App使用情况
-2) 输入7758521 进入App监控管理页面 AdminMonitorActivity.kt  
-   这是一个可以局域网查看其他手机（安装了本app）的功能，一样可以分 天、星期、月份查看远程手机App使用情况
+> SplashActivity.kt 3秒倒计时，之后进入登录页面  
+> LoginActivity.kt 登录页面，可以跳转不同后台    
+> MonitorActivity.kt 本地监控页  
+> AdminMonitorActivity.kt 管理监控页  
 
 #### 服务
 
@@ -23,7 +19,8 @@
 5) 通过PhotoService.kt提供前置摄像头拍照  
 
 > PhotoService  拍照服务
-  调用前置摄像头进行拍照，并发送给远程调用方
+  调用前置摄像头进行拍照，并发送给远程调用方  
+> AppUpdateManager  应用自动升级服务
 
 #### 广播接受器  
 
@@ -80,7 +77,6 @@ android:name="android.permission.WAKE_LOCK" /><!-- 确保 Socket 长连接在 CP
   无障碍只能手动
 * 静默截屏涉及安全暂时无法实现
 * 个别手机重启无法提供监控服务要等15分钟后，需要排查
-* README文档整理
 
 本APP仅无聊学习安卓开发练手，请勿他用，如有任何责任均与本人无关
 代码参考列表

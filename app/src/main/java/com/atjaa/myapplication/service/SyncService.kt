@@ -29,9 +29,9 @@ class SyncService : Service() {
                 provider: ContentProviderClient?,
                 syncResult: SyncResult?
             ) {
-                Log.i(TAG, "账号同步触发，检查MonitorService 存活状态")
+                Log.i(TAG, "账号同步 检查MonitorService 存活状态")
                 if (!isPortOpen("127.0.0.1", ConstConfig.PORT)) {
-                    Log.i(TAG, "MonitorService 已死，执行拉起操作")
+                    Log.i(TAG, "账号同步 MonitorService 已死，执行拉起操作")
                     // 启动你的服务
                     val serviceIntent = Intent(context, MonitorService::class.java)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -40,7 +40,7 @@ class SyncService : Service() {
                         context.startService(serviceIntent)
                     }
                 } else {
-                    Log.i(TAG, "MonitorService 存活，无需处理")
+                    Log.i(TAG, "账号同步 MonitorService 存活，无需处理")
                 }
             }
         }
@@ -51,7 +51,7 @@ class SyncService : Service() {
     }
 
     private fun isPortOpen(ip: String, port: Int, timeout: Int = 300): Boolean {
-        Log.i(TAG, "触发保活检查")
+        Log.i(TAG, "账号同步 触发保活检查")
         return try {
             val socket = Socket()
             socket.connect(InetSocketAddress(ip, port), timeout)

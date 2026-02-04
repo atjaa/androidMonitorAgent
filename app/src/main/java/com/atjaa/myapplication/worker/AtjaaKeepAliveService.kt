@@ -29,7 +29,7 @@ class AtjaaKeepAliveService : AccessibilityService() {
                 || pkgName.contains("com.miui.securitycenter")
                 || pkgName.contains("com.android.settings")
             ) {
-                Log.d(TAG, "检测到权限相关页面: $pkgName")
+                Log.d(TAG, "无障碍 检测到权限相关页面: $pkgName")
                 handleAutoClick(event)
             }
         }
@@ -41,7 +41,7 @@ class AtjaaKeepAliveService : AccessibilityService() {
         }
 
         lastCheckTime = currentTime
-        Log.d(TAG, "触发一次无障碍检查")
+        Log.d(TAG, "无障碍 触发一次无障碍保活检查")
         CommonUtils.scheduleServiceCheck(this)
     }
 

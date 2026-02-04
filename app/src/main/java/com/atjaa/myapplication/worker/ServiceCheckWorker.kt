@@ -18,6 +18,7 @@ class ServiceCheckWorker(context: Context, workerParams: WorkerParameters) :
     Worker(context, workerParams) {
     val TAG: String = "MyAccessibilityService"
     override fun doWork(): Result {
+        Log.i(TAG, "保活Worker触发")
         val context = applicationContext
         // 检查服务是否正在运行（2026 年标准做法是检查静态变量或进程状态）
         if (!isPortOpen("127.0.0.1", ConstConfig.PORT)) {

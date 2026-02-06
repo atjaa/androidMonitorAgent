@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleService
 import com.atjaa.myapplication.utils.MonitorUtils
+import com.atjaa.myapplication.utils.PermissionUtils
 
 
 /**
@@ -59,18 +60,13 @@ class PhotoService : LifecycleService() {
         if(!isScreenOn){
             return "手机处于锁屏状态"
         }
+        if(!PermissionUtils.isUsageCompat(this)){
+            Log.d(TAG,"Photo服务检查没有拍照权限")
+            return "手机未开启拍照权限"
+        }
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         var dataStr: String? = null
         cameraProviderFuture.addListener({
-            Log.e(
-                "CameraX",
-                "是否有拍照全权限: ${
-                    ContextCompat.checkSelfPermission(
-                        this,
-                        android.Manifest.permission.CAMERA
-                    ) == PackageManager.PERMISSION_GRANTED
-                }"
-            )
             val cameraProvider = cameraProviderFuture.get()
             val imageCapture = ImageCapture.Builder().build()
             val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA

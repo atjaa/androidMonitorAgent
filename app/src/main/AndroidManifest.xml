@@ -36,13 +36,10 @@
         android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"
         tools:ignore="ProtectedPermissions" />
 
-    <!-- 账号同步权限声明 开始 -->
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" /><!-- 账号同步权限声明 开始 -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
-    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
-    <!-- 账号同步权限声明 结束 -->
-
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" /> <!-- 账号同步权限声明 结束 -->
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
@@ -60,7 +57,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidMonitorAgent"
         android:usesCleartextTraffic="true">
-
         <activity
             android:name=".AboutActivity"
             android:exported="false" />
@@ -100,29 +96,35 @@
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="remoteMessaging"
-            tools:ignore="ForegroundServicePermission" />
-        <!-- 账号注册 注册认证服务 -->
-        <service android:name=".service.AuthenticatorService" android:exported="false">
+            tools:ignore="ForegroundServicePermission" /> <!-- 账号注册 注册认证服务 -->
+        <service
+            android:name=".service.AuthenticatorService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
-            <meta-data android:name="android.accounts.AccountAuthenticator" android:resource="@xml/authenticator" />
-        </service>
 
-        <!-- 账号注册 注册同步服务 -->
-        <service android:name=".service.SyncService" android:exported="true">
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service> <!-- 账号注册 注册同步服务 -->
+        <service
+            android:name=".service.SyncService"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
             </intent-filter>
-            <meta-data android:name="android.content.SyncAdapter" android:resource="@xml/sync_adapter" />
-        </service>
 
-        <!-- 账号注册 注册占位 Provider (注意 authority 必须唯一) -->
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/sync_adapter" />
+        </service> <!-- 账号注册 注册占位 Provider (注意 authority 必须唯一) -->
         <provider
             android:name=".service.StubProvider"
             android:authorities="com.atjaa.monitor.provider"
             android:exported="false"
             android:syncable="true" />
+
         <receiver
             android:name=".receiver.BootReceiver"
             android:enabled="true"

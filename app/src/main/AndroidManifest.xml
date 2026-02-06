@@ -79,7 +79,7 @@
 
         <service
             android:name=".worker.AtjaaKeepAliveService"
-            android:exported="false"
+            android:exported="true"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
@@ -98,7 +98,7 @@
         <service
             android:name=".service.MonitorService"
             android:enabled="true"
-            android:exported="false"
+            android:exported="true"
             android:foregroundServiceType="remoteMessaging"
             tools:ignore="ForegroundServicePermission" />
         <!-- 账号注册 注册认证服务 -->

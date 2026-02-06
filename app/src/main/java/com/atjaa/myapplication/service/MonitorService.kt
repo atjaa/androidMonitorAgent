@@ -68,8 +68,12 @@ class MonitorService : Service() {
     // 拍照服务连接器
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as PhotoService.LocalBinder
-            targetService = binder.getService()
+            try {
+                val binder = service as PhotoService.LocalBinder
+                targetService = binder.getService()
+            } catch (e: Exception) {
+                Log.e(TAG, "Bind PhotoService 异常" + e.message)
+            }
             isBound = true
         }
 

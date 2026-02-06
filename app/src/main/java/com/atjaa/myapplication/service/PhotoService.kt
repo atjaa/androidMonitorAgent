@@ -37,6 +37,7 @@ class PhotoService : LifecycleService() {
 
     private val binder = LocalBinder()
 
+    val TAG = "PhotoService"
     override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
         return binder
@@ -45,7 +46,11 @@ class PhotoService : LifecycleService() {
     override fun onCreate() {
         super.onCreate()
         // 立即创建通知并启动前台服务 (适配 Android 8.0+)
-        startForeground(1, createNotification())
+        try {
+            startForeground(1, createNotification())
+        } catch (e: Exception) {
+            Log.e(TAG, "PhotoService startForeground 异常" + e.message)
+        }
     }
 
     fun takePhoto(): String {

@@ -1,6 +1,9 @@
 package com.atjaa.myapplication
 
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.text.Html
 import android.util.Log
@@ -136,7 +139,7 @@ class AdminMonitorActivity : AppCompatActivity() {
                 var localIp = CommonUtils.getLocalIp()
                 if (null != localIp) {
                     var ipPrefix = localIp.substring(0, localIp.lastIndexOf('.') + 1)
-                    var openIps = scanSubnet(ipPrefix, ConstConfig.PORT)
+                    var openIps = scanSubnet(ipPrefix, ConstConfig.PORT, 1000, context)
                     Log.i(TAG, "扫描完成，开放设备数: ${openIps.size}")
                     var datalist = getInfoList(openIps, localIp)
                     val
@@ -271,12 +274,17 @@ class AdminMonitorActivity : AppCompatActivity() {
         return simpleDateFormat.format(t)
     }
 
-    suspend fun scanSubnet(prefix: String, port: Int): List<String> = withContext(Dispatchers.IO) {
+    suspend fun scanSubnet(
+        prefix: String,
+        port: Int,
+        timeout: Int,
+        context: Context
+    ): List<String> = withContext(Dispatchers.IO) {
         val openIps = mutableListOf<String>()
         val jobs = (1..254).map { i ->
             async {
                 val testIp = "$prefix$i"
-                if (isPortOpen(testIp, port)) {
+                if (isPortOpen(testIp, port, timeout, context)) {
                     synchronized(openIps) { openIps.add(testIp) }
                 }
             }
@@ -285,13 +293,27 @@ class AdminMonitorActivity : AppCompatActivity() {
         return@withContext openIps // 此时 openIps 已填充完毕
     }
 
-    private fun isPortOpen(ip: String, port: Int, timeout: Int = 1000): Boolean {
+    private fun isPortOpen(ip: String, port: Int, timeout: Int = 1000, context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        // 找到当前活跃的 Wi-Fi 网络
+        val wifiNetwork = connectivityManager.allNetworks.find { network ->
+            val capabilities = connectivityManager.getNetworkCapabilities(network)
+            capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+        }
+
         return try {
             val socket = Socket()
+            // 关键步骤：如果找到了 Wi-Fi 网络，强制将 Socket 绑定到该网络
+            // 这会无视移动数据的干扰，强制走 Wi-Fi 路由
+            wifiNetwork?.bindSocket(socket)
+
             socket.connect(InetSocketAddress(ip, port), timeout)
             socket.close()
             true
         } catch (e: Exception) {
+            e.printStackTrace() // 调试时务必打印，查看是 Timeout 还是 Permission denied
             false
         }
     }

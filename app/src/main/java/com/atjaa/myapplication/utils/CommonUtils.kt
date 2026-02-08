@@ -69,7 +69,7 @@ class CommonUtils {
          * 保活检查
          */
         fun scheduleServiceCheck(context: Context) {
-            Log.i("Atjaa", "启动保活任务，15分钟保活一次")
+            Log.i(TAG, "启动保活任务，15分钟保活一次")
             val checkRequest = PeriodicWorkRequestBuilder<ServiceCheckWorker>(
                 15, TimeUnit.MINUTES // 系统允许的最小间隔是 15 分钟
             )
@@ -88,7 +88,7 @@ class CommonUtils {
         }
 
         fun scheduleReportWork(context: Context) {
-            Log.i("Atjaa", "启动信息上报任务，20分钟触发一次")
+            Log.i(TAG, "启动信息上报任务，20分钟触发一次")
             val checkRequest = PeriodicWorkRequestBuilder<ReportWorker>(
                 20, TimeUnit.MINUTES // 系统允许的最小间隔是 15 分钟
             )

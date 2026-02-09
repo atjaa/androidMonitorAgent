@@ -30,12 +30,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.lang.reflect.Type
+import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.net.SocketTimeoutException
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.concurrent.TimeUnit
+import javax.net.SocketFactory
 
 
 /**
@@ -281,11 +289,15 @@ class AdminMonitorActivity : AppCompatActivity() {
         context: Context
     ): List<String> = withContext(Dispatchers.IO) {
         val openIps = mutableListOf<String>()
+        // 关键：限制同时进行的扫描任务数量，防止 ARP 风暴和线程耗尽
+        val semaphore = Semaphore(20)
         val jobs = (1..254).map { i ->
             async {
                 val testIp = "$prefix$i"
-                if (isPortOpen(testIp, port, timeout, context)) {
-                    synchronized(openIps) { openIps.add(testIp) }
+                semaphore.withPermit {
+                    if (isPortOpen(testIp, port, timeout, context)) {
+                        synchronized(openIps) { openIps.add(testIp) }
+                    }
                 }
             }
         }
@@ -293,27 +305,88 @@ class AdminMonitorActivity : AppCompatActivity() {
         return@withContext openIps // 此时 openIps 已填充完毕
     }
 
-    private fun isPortOpen(ip: String, port: Int, timeout: Int = 1000, context: Context): Boolean {
+    private fun isPortOpen(ip: String, port: Int, timeout: Int = 2000, context: Context): Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-        // 找到当前活跃的 Wi-Fi 网络
+        // 1. 查找当前活跃的 Wi-Fi 网络
         val wifiNetwork = connectivityManager.allNetworks.find { network ->
             val capabilities = connectivityManager.getNetworkCapabilities(network)
             capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
         }
 
         return try {
+            // 2. 预热 (Pre-heat / ARP Warming)
+            // 即使目标禁 Ping，这一步也会强制系统内核发送 ARP 请求去获取目标的 MAC 地址。
+            // 我们给预热分配 500ms，不关心它是否真的 Reachable。
+            val address = InetAddress.getByName(ip)
+            try {
+                address.isReachable(300)
+            } catch (e: Exception) {
+                // 忽略预热异常，它只是为了刷新内核 ARP 表
+            }
+
+            // 3. 正式建立 Socket 连接
             val socket = Socket()
-            // 关键步骤：如果找到了 Wi-Fi 网络，强制将 Socket 绑定到该网络
-            // 这会无视移动数据的干扰，强制走 Wi-Fi 路由
+
+            // 强制绑定 WiFi 路由，防止流量干扰
             wifiNetwork?.bindSocket(socket)
 
-            socket.connect(InetSocketAddress(ip, port), timeout)
+            // 使用 InetSocketAddress 显式连接
+            // 如果第一阶段预热成功，这里的三次握手将非常快
+            socket.connect(InetSocketAddress(address, port), timeout)
+
             socket.close()
+            Log.d(TAG, "连接成功: $ip:$port")
             true
+        } catch (e: SocketTimeoutException) {
+            // 捕获超时：通常是防火墙拦截、IP 不存在或 ARP 依然未解析
+            Log.w(TAG, "连接超时 ($ip:$port): ${e.message}")
+            false
         } catch (e: Exception) {
-            e.printStackTrace() // 调试时务必打印，查看是 Timeout 还是 Permission denied
+            // 捕获其他异常：如 Connection Refused (端口未监听)
+            Log.e(TAG, "连接失败 ($ip:$port): ${e.message}")
+            false
+        }
+    }
+
+    private fun isHttpPortOpen(
+        ip: String,
+        port: Int,
+        timeout: Int = 1000,
+        context: Context
+    ): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        // 1. 获取 WiFi 网络对象
+        val wifiNetwork = connectivityManager.allNetworks.find { network ->
+            val capabilities = connectivityManager.getNetworkCapabilities(network)
+            capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+        }
+
+        // 2. 构建 OkHttpClient 并强制绑定到 WiFi
+        val client = OkHttpClient.Builder()
+            .connectTimeout(timeout.toLong(), TimeUnit.MILLISECONDS)
+            .socketFactory(wifiNetwork?.socketFactory ?: SocketFactory.getDefault()) // 核心：强制走 WiFi
+            .build()
+
+        // 3. 发起一个轻量级的 HEAD 请求（只握手，不下载数据）
+        val request = Request.Builder()
+            .url("http://$ip:$port")
+            .head() // 比 GET 更快，仅测试端口可达性
+            .build()
+
+        return try {
+            // execute() 是同步执行，适合在协程或子线程中调用
+            client.newCall(request).execute().use { response ->
+                // 只要握手成功并有响应（无论是 200 还是 404），都说明端口是开的
+                true
+            }
+        } catch (e: Exception) {
+            // 如果是 Timeout，这里会捕获到 SocketTimeoutException
+            // 如果是拒绝连接，会捕获到 ConnectException
+            Log.e(TAG, "isHttpPortOpen 判断 " + ip + "是否可连接失败：" + e.message)
             false
         }
     }

@@ -14,6 +14,7 @@
         tools:ignore="ForegroundServicesPolicy" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
     <uses-permission android:name="android.permission.INTERNET" /> <!-- 网络权限 -->
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" /> <!-- 获取蓝牙名称通常是获取用户自定义手机名最通用的办法 -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- 确保 Socket 长连接在 CPU 进入休眠时不中断，申请和使用 WAKE_LOCK -->

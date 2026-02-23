@@ -367,7 +367,7 @@ class AdminMonitorActivity : AppCompatActivity() {
 
         // 2. 构建 OkHttpClient 并强制绑定到 WiFi
         val client = OkHttpClient.Builder()
-            .connectTimeout(timeout.toLong(), TimeUnit.MILLISECONDS)
+            .connectTimeout(2, TimeUnit.SECONDS)
             .socketFactory(wifiNetwork?.socketFactory ?: SocketFactory.getDefault()) // 核心：强制走 WiFi
             .build()
 

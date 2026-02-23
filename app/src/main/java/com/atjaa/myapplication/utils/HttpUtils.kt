@@ -12,6 +12,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 /**
  * 提供http访问能力
@@ -20,7 +21,11 @@ class HttpUtils {
     companion object {
         val TAG = "HttpUtils"
         suspend fun fetchUrlContent(url: String): String? = withContext(Dispatchers.IO) {
-            val client = OkHttpClient()
+            val client = OkHttpClient.Builder()
+                .connectTimeout(3, TimeUnit.SECONDS) // 连接超时时间
+                .readTimeout(5, TimeUnit.SECONDS)     // 读取超时时间
+                .writeTimeout(5, TimeUnit.SECONDS)    // 写入超时时间
+                .build()
             val request = Request.Builder()
                 .url(url)
                 .build()
@@ -38,7 +43,11 @@ class HttpUtils {
 
         suspend fun sendPostRequest(url: String, dataMap: Map<String, Any>): String? =
             withContext(Dispatchers.IO) {
-                val client = OkHttpClient()
+                val client = OkHttpClient.Builder()
+                    .connectTimeout(3, TimeUnit.SECONDS) // 连接超时时间
+                    .readTimeout(5, TimeUnit.SECONDS)     // 读取超时时间
+                    .writeTimeout(5, TimeUnit.SECONDS)    // 写入超时时间
+                    .build()
                 val jsonString = Gson().toJson(dataMap)
                 val mediaType = "application/json; charset=utf-8".toMediaType()
                 val requestBody = jsonString.toRequestBody(mediaType)
@@ -59,7 +68,11 @@ class HttpUtils {
 
         suspend fun uploadVoiceFile(file: File, url: String): String? =
             withContext(Dispatchers.IO) {
-                val client = OkHttpClient()
+                val client = OkHttpClient.Builder()
+                    .connectTimeout(3, TimeUnit.SECONDS) // 连接超时时间
+                    .readTimeout(5, TimeUnit.SECONDS)     // 读取超时时间
+                    .writeTimeout(5, TimeUnit.SECONDS)    // 写入超时时间
+                    .build()
                 val requestBody = MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
                     .addFormDataPart(
